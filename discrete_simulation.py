@@ -15,6 +15,16 @@ tfd = tfp.distributions
 n_plots = 7
 n_sim = 20
 n_steps = 100
+obs_type = "Normal"
+state_dimension = 1
+state_drift = 0.5
+initial_state_mean = 0    
+initial_state_variance = 1.
+transition_variance = 0.25 
+measurement_dimension = 1
+measurement_drift = 0.
+measurement_variance = 2.
+measurement_coefficient= 0.5
 
 class SyntheticDataSetGenerator(object):
     """ Linear transition and emission functions """
@@ -95,16 +105,16 @@ class SyntheticDataSetGenerator(object):
 # for now tested only with below configuration
 
 syn_dataset = SyntheticDataSetGenerator(
-      s_dim = 1,    
-      s_drift = 0.,
-      init_s_mu = 0,    
-      init_s_cov = 1.,
-      trans_cov = 0.25, 
-      obs_dim = 1,
-      obs_drift = 0.,
-      obs_cov = 2.,
-      obs_coeff= 0.5,
-      obs_dist = "Poisson")
+      s_dim = state_dimension,    
+      s_drift = state_drift,
+      init_s_mu = initial_state_mean,    
+      init_s_cov = initial_state_variance,
+      trans_cov = transition_variance, 
+      obs_dim = measurement_dimension,
+      obs_drift = measurement_drift,
+      obs_cov = measurement_variance,
+      obs_coeff= measurement_coefficient,
+      obs_dist = obs_type)
       
 s_true, obs_true = syn_dataset(n_sim, n_steps)
 s_true.shape, obs_true.shape
@@ -264,32 +274,32 @@ def build_custom_poisson_ssm(syn_dataset: SyntheticDataSetGenerator, num_timeste
     
     return model
 
-
-# model = build_tfp_lg_ssm(syn_dataset)
-model_poisson = build_custom_poisson_ssm(syn_dataset, num_timesteps = n_steps)
+if obs_type == "Normal":
+  model = build_tfp_lg_ssm(syn_dataset, num_timesteps = n_steps)
+elif obs_type == "Poisson":
+  model_poisson = build_custom_poisson_ssm(syn_dataset, num_timesteps = n_steps)
 
 # Make a tensorflow dataset
 X_train = tf.data.Dataset.from_tensors(obs_true)
-
 # batch it up
 x = next(iter(X_train.batch(batch_size=n_sim).map(lambda x : tf.cast(x, dtype=tf.float32))))[0]
 print(x.shape)
 
-# _, filtered_means, filtered_covs, predicted_means, predicted_covs, _, _ = model.forward_filter(x)
-_, filtered_means_poisson, _, predicted_means_poisson, _, observation_means, _ = model_poisson.forward_filter(x)
+if obs_type == "Normal":
+  _, filtered_means, filtered_covs, predicted_means, predicted_covs, _, _ = model.forward_filter(x)
+elif obs_type == "Poisson":
+  _, filtered_means_poisson, _, predicted_means_poisson, _, observation_means, _ = model_poisson.forward_filter(x)
 
-predicted_means.shape, filtered_means.shape  # predicted_means gives the t+1 prediction
-
-# def plot_tfp_kalman_s(sequences, ax):
-#   for i in range(len(sequences)):
-#     d =  filtered_means[sequences[i]]
-#     x_axis = np.arange(len(d))
-#     ax[i][0].plot(x_axis, d, label='s_kf_estimate',color='orange')
-#     ax[i][0].legend(loc='best')
-#     # Now plot the corresponding predictions of observations based on the filtered means
-#     obs_predictions = syn_dataset.emission(d)  # Apply the emission function to the filtered means
-#     ax[i][1].plot(x_axis, obs_predictions, label='obs_kf_pred', linestyle='--',color='#33FF57')
-#     ax[i][1].legend(loc='best')
+def plot_tfp_kalman_s(sequences, ax):
+  for i in range(len(sequences)):
+    d =  filtered_means[sequences[i]]
+    x_axis = np.arange(len(d))
+    ax[i][0].plot(x_axis, d, label='s_kf_estimate',color='orange')
+    ax[i][0].legend(loc='best')
+    # Now plot the corresponding predictions of observations based on the filtered means
+    obs_predictions = syn_dataset.emission(d)  # Apply the emission function to the filtered means
+    ax[i][1].plot(x_axis, obs_predictions, label='obs_kf_pred', linestyle='--',color='#33FF57')
+    ax[i][1].legend(loc='best')
     
 def plot_tfp_poisson_s(sequences, ax):
   for i in range(len(sequences)):
@@ -301,11 +311,17 @@ def plot_tfp_poisson_s(sequences, ax):
     obs_predictions = syn_dataset.emission(d)  # Apply the emission function to the filtered means
     ax[i][1].plot(x_axis, obs_predictions, label='obs_ss_pred', linestyle='--',color='#33FF57')
     ax[i][1].legend(loc='best')
-    
-# change seed to other seqeuences
-np.random.seed(3)
-sequences = np.random.permutation(n_sim)[:n_plots]
-make_train_plots(
-    sequences=sequences, 
-    extra_plots=[plot_tfp_poisson_s])
+
+if obs_type == "Normal":
+  np.random.seed(3)
+  sequences = np.random.permutation(n_sim)[:n_plots]
+  make_train_plots(
+      sequences=sequences, 
+      extra_plots=[plot_tfp_kalman_s])
+elif obs_type == "Poisson":
+  np.random.seed(3)
+  sequences = np.random.permutation(n_sim)[:n_plots]
+  make_train_plots(
+      sequences=sequences, 
+      extra_plots=[plot_tfp_poisson_s])
 
