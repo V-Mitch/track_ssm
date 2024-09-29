@@ -47,6 +47,7 @@ def get_and_df_data(url):
     df_data = {
         'Rank': ranks,
         'Mark': marks,
+        'Wind': wind,
         'Competitor': competitors,
         'DOB': dobs,
         'Nationality': nationalities,
