@@ -1,12 +1,14 @@
-reticulate::use_virtualenv("~/.virtualenvs/r-reticulate", required = TRUE)
+
 import pandas as pd
 import numpy as np
 pd.set_option('display.max_columns', None)
 from datetime import datetime
+import tensorflow as tf
 import tensorflow_probability as tfp
+import matplotlib.pyplot as plt
 tfd = tfp.distributions
 
-df_raw = pd.read_csv('men 100m from_2024-01-01 to_2024-09-26.csv')
+df_raw = pd.read_csv('men 100m from_2022-01-01 to_2024-09-30.csv')
 
 def convert_dates(date):
     try:
@@ -37,8 +39,7 @@ params = {
     'obs_coeff': 1,
     's_drift': -0.02,
     'trans_cov': 0.05,
-    'obs_dim': 1,
-    'obs_cov': 0.15,
+    'obs_dim': 0,
     'init_s_mu': 10,
     'init_s_cov': 0.05,
     'obs_cov': 0.05  
@@ -76,17 +77,65 @@ def build_tfp_lg_ssm(num_timesteps: int, params: dict):
   
   return model
 
-n_steps = personal_df_list['Letsile TEBOGO'].shape[0]
+n_steps = personal_df_list['Noah LYLES'].shape[0]
 model = build_tfp_lg_ssm(params = params, num_timesteps = n_steps)
-obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark'])[:,np.newaxis]
+obs_true = np.array(personal_df_list['Noah LYLES']['Mark'])[:,np.newaxis]
 
 # Make a tensorflow dataset
 X_train = tf.data.Dataset.from_tensors(obs_true)
 # batch it up
-x = next(iter(X_train.batch(batch_size=n_sim).map(lambda x : tf.cast(x, dtype=tf.float32))))[0]
+x = next(iter(X_train.batch(batch_size=100).map(lambda x : tf.cast(x, dtype=tf.float32))))[0]
 print(x.shape)
 _, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, _ = model.forward_filter(x)
 
+def emission_function(filtered_means, obs_coeff, obs_dim):
+    # Apply the linear emission function
+    return obs_coeff * filtered_means + obs_dim
+  
+def plot_tfp_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs, 
+    obs_coeff, predicted_means, observation_means, obs_dim):
+    x_axis = np.arange(len(filtered_means))
+
+    # Calculate predicted observations
+    # obs_predictions = emission_function(observation_means.flatten(), obs_coeff, obs_dim)
+    obs_predictions = observation_means.numpy().flatten()
+
+    # Calculate prediction intervals
+    lower_bound = obs_predictions - 1.96 * np.sqrt(filtered_covs.flatten())  # 95% prediction interval lower bound
+    upper_bound = obs_predictions + 1.96 * np.sqrt(filtered_covs.flatten())  # 95% prediction interval upper bound
+
+    # Plot the filtered state estimates
+    ax[0].plot(x_axis, filtered_means.flatten(), label='s_kf_estimate', color='orange')
+    ax[0].legend(loc='best')
+    ax[0].set_title('Filtered State Estimates')
+
+    # Plot the predicted observations
+    ax[1].plot(x_axis, obs_predictions, label='obs_kf_pred', linestyle='--', color='#33FF57')
+    ax[1].plot(x_axis, obs_true.flatten(), label='obs_true', color='blue')  # Plot true observations for comparison
+    
+    # Shade the prediction intervals
+    ax[1].fill_between(x_axis, lower_bound, upper_bound, color='lightgreen', alpha=0.5, label='Prediction Interval')
+    
+    ax[1].legend(loc='best')
+    ax[1].set_title('Predicted Observations vs True Observations')
+    
+    
+# Create a figure with side-by-side plots
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns
+
+# Call the plot function
+plot_tfp_kalman_s(sequences=None, ax=ax, obs_true=obs_true, 
+                   predicted_means=predicted_means.numpy(),
+                   filtered_means=filtered_means.numpy(),
+                   filtered_covs=filtered_covs.numpy(), 
+                   observation_means=observation_means,
+                   obs_coeff=params.get('obs_coeff', 1), 
+                   obs_dim=params.get('obs_dim', 1))
+
+plt.tight_layout()
+plt.show()
+
+(some of the old plotting code, there was also the make_plot)
 def plot_tfp_kalman_s(sequences, ax):
     d =  filtered_means
     x_axis = np.arange(len(d))
