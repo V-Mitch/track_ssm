@@ -12,6 +12,7 @@ I use several resources for running the project denoted in [the references secti
 
 # Model 1:
 
-Naive Assumptions:
+Naive Assumptions:  
+$`\sqrt{3x-1}+(1+x)^2`$
 
 # References {#references}
