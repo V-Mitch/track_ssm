@@ -1,13 +1,13 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import pandas as pd
+from datetime import datetime
 
 # Links to data
 MEN_LINK = "https://www.worldathletics.org/records/all-time-toplists/throws/hammer-throw/outdoor/men/senior?regionType=world&page=1&bestResultsOnly=false&firstDay=1899-12-31&lastDay=2021-02-09"
 WOMEN_LINK = "https://www.worldathletics.org/records/all-time-toplists/throws/hammer-throw/outdoor/women/senior?regionType=world&page=1&bestResultsOnly=false&firstDay=1899-12-30&lastDay=2021-02-08"
-year = 2024
-first_day = "2024-01-01"
-last_day = str(date.today())
+first_day = "2020-01-01"
+last_day = datetime.today().strftime('%Y-%m-%d')
 
 # Simple web scraping with BeautifulSoup
 
@@ -60,10 +60,13 @@ def get_and_df_data(url):
     return(df)
 
 list_df = []
-for i in range(1,19):
+for i in range(1,500):
   page = str(i)
-  men_link = "https://worldathletics.org/records/all-time-toplists/sprints/100-metres/all/men/senior?regionType=world&timing=electronic&windReading=regular&page="+page+"&bestResultsOnly=false&firstDay="+first_day+"&lastDay="+last_day+"&maxResultsByCountry=all&eventId=10229630&ageCategory=senior"
-  df = get_and_df_data(men_link)
+  try:
+    men_link = "https://worldathletics.org/records/all-time-toplists/sprints/100-metres/all/men/senior?regionType=world&timing=electronic&windReading=regular&page="+page+"&bestResultsOnly=false&firstDay="+first_day+"&lastDay="+last_day+"&maxResultsByCountry=all&eventId=10229630&ageCategory=senior"
+    df = get_and_df_data(men_link)
+  except:
+    print("end of collection")
   list_df.append(df)
   print('url '+ page + ' saved')
   
