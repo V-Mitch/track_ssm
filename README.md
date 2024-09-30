@@ -8,7 +8,7 @@ I use several resources for running the project denoted in [the references secti
 
 # Main Depiction
 
-![alt text](https://github.com/V-Mitch/track_ssm/depiction_1.png)
+![alt text](https://github.com/V-Mitch/track_ssm/blob/master/depiction_1.png)
 
 # Model 1:
 
