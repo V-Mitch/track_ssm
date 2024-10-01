@@ -67,8 +67,8 @@ def build_tfp_lg_ssm(num_timesteps: int, params: dict):
   transition_matrix = [[1.]]
   observation_matrix = [[obs_coeff]]
   transition_noise = tfd.MultivariateNormalDiag(
-      loc = [s_mu],
-      scale_diag= [s_cov])
+      loc = [tf.convert_to_tensor(s_mu)],
+      scale_diag= [tf.convert_to_tensor(s_cov)])
   observation_noise = tfd.MultivariateNormalDiag(
       loc = [obs_mu],
       scale_diag = [obs_cov])
@@ -95,7 +95,7 @@ X_train = tf.data.Dataset.from_tensors(obs_true)
 # batch it up
 x = next(iter(X_train.batch(batch_size=100).map(lambda x : tf.cast(x, dtype=tf.float32))))[0]
 print(x.shape)
-L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = model.forward_filter(x, final_step_only = True)
+L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = model.forward_filter(x, final_step_only = False)
 
 def emission_function(filtered_means, obs_coeff, obs_mu):
     # Apply the linear emission function
