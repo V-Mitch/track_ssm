@@ -192,7 +192,7 @@ for i, competitor in enumerate(personal_df_list):
         upper_bound = observation_means.numpy().flatten() + 1.96 * np.sqrt(observation_covs.numpy().flatten())
 
         # Plot the filtered state estimates
-        ax_row[0].plot(x_axis, filtered_means.numpy().flatten(), label='s_kf_estimate', color='orange')
+        ax_row[0].plot(x_axis, filtered_means.numpy().flatten(), label='fit_level', color='orange')
         ax_row[0].legend(loc='lower left', ncol=1)
         ax_row[0].set_title(f'{competitor} - Filtered State Estimates')
         ax_row[0].set_ylim(bottom=9.2)  # Adjust y-axis as needed
@@ -207,8 +207,8 @@ for i, competitor in enumerate(personal_df_list):
                        bbox=dict(facecolor='white', edgecolor = 'lightgray', alpha=0.5))
 
         # Plot the predicted observations
-        ax_row[1].plot(x_axis, observation_means.numpy().flatten(), label='obs_kf_pred', linestyle='--', color='#33FF57')
-        ax_row[1].plot(x_axis, obs_true.flatten(), label='obs_true', color='blue')  # Plot true observations for comparison
+        ax_row[1].plot(x_axis, observation_means.numpy().flatten(), label='obs_pred', linestyle='--', color='#33FF57')
+        ax_row[1].plot(x_axis, obs_true.flatten(), label='Race Result', color='blue')  # Plot true observations for comparison
         
         # Shade the prediction intervals for existing observations
         ax_row[1].fill_between(x_axis, lower_bound, upper_bound, 
@@ -238,7 +238,7 @@ for i, competitor in enumerate(personal_df_list):
                                 y_lower_values, 
                                 y_upper_values,
                                 color='lightcoral', alpha=0.5, label='Next Obs Prediction Interval')
-        ax_row[1].plot(x_values_next, predicted_display_mean, label=f'next_pred: {predicted_next_mean_display}', linestyle='--', color='coral')
+        ax_row[1].plot(x_values_next, predicted_display_mean, label=f'Next Race Prediction: {predicted_next_mean_display}', linestyle='--', color='coral')
         
         # Plot the predicted next observation as a continuation
         # ax_row[1].plot(len(filtered_means), predicted_next_mean, 'o', color='lightcoral', label='Predicted Next Obs')

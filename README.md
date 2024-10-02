@@ -53,7 +53,12 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 ## Commentary of Model 1
   
-Many of the assumptions do not reflect realism in this first iteration of the state-space model. Hopefully, it provides a good starting point for improvement.
+Many of the assumptions do not reflect realism in this first iteration of the state-space model. Hopefully, it provides a good starting point for improvement.  
+  
+In order of importance the following most important points are not yet accounted for correctly. These initial observations are from general knowledge of the sport:  
+- The runners do not exert full effort in races for qualifications or where the stakes are lower to avoid injury and preserve strength for later races or stages.  
+- Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend.  
+- As the fitness level improves, it becomes increasingly difficult to make incremental imrpovements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
 
 # References 
 
