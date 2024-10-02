@@ -2,9 +2,11 @@
 
 # Goal:
 
-Apply and understand the State-Space model approach with Bayesian Filtering.\
-The example case is the 100m time progression of the 8 athletes who made it to the Paris 100m Olympic final. - Model the progression path of each of the 8 athletes over their past 4 seasons in the 100m. - Make a prediction for the 100m final that took place at the Paris Olympics 2024 on August 4th using only data from before that day.
-
+Apply and understand the State-Space model approach with Bayesian Filtering.
+The example case is the 100m time progression of the 8 athletes who made it to the Paris 100m Olympic final.  
+- Model the progression path of each of the 8 athletes over their past 4 seasons in the 100m.  
+- Make a prediction for the 100m final that took place at the Paris Olympics 2024 on August 4th using only data from before that day.  
+  
 I use several resources for running the project denoted in [the references section](#References)
 
 ![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/start_100m.jpg)
