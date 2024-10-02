@@ -10,8 +10,9 @@ The example case is the 100m time progression of the 8 athletes who made it to t
 I use several resources for running the project denoted in [the references section](#References)
   
 ![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/start_100m.jpg)
+(Photo: Fabrizio Bensch/Reuters)
   
-# Main Depiction
+# Depiction of State-Space Model
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/depiction_1.png)
   
