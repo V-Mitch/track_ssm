@@ -43,9 +43,10 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 This is naively fixing the randomness during any race as the average per-season deviation of the athletes in the database.  
   
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/plot_1.png)
-
-Naive Assumptions:  
-$`\sqrt{3x-1}+(1+x)^2`$
+![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
 # References 
+Inspiration for code:
+https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing  
+Main resource for theory:
+Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021.  
