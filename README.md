@@ -45,9 +45,9 @@ $v_t \sim \mathcal{N}(\mu_{v}, \sigma_{v})$
 
 $\beta = 1$\
 $\mu_v = 0$\
-$\sigma_v = \hat{\sigma}_{clockings}$\
+$\sigma_v = \hat{\sigma}_{clockings}$ 
 
-## Results
+## Results of Model 1
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
