@@ -21,14 +21,14 @@ $t$ is the race number $t$ at which the competitor competed
 
 # Model 1:
 
-## Assumptions Model 1
+## Assumptions of Model 1
 
--   First, I assume the state-space model is a Kalman Filter with linear emission and transmission functions. So this means that the $w_t$ and $v_t$ follow the normal distribution.\
--   Next, I fill in the variance of measurement noise, $v_t$ with a rough approximation.\
--   The tranmission noise or $w_t$ has it's mean and variance optimized with the tensorflow gradient function. (Automatic Differentiation) in such a way that minimizes the loss.
--   Set $s_0$, the initial state as the average clocking for all athletes in all races in the database since 2020. This only includes elite athletes who have run a time below 10.30. It is universal and is not athlete-specific.\
--   $\mu_w$ and $\sigma_w$ are optimized in such a way that minimizes the loss function. In this case, it is the negative log-likelihood function for the entire path of a single athlete.\
--   Fixing the parameter, $\beta = 1$ means that we can interpret the \* unobserved fitness level\* as the 100m clocking the athlete is capable of.\
+-   First, I assume the state-space model is a Kalman Filter with linear emission and transmission functions. So this means that the $w_t$ and $v_t$ follow the normal distribution.
+-   Next, I fill in the variance of measurement noise, $v_t$ with a rough approximation.
+-   The transmission noise or $w_t$ has it's mean and variance optimized with the tensorflow gradient function. (Automatic Differentiation) in such a way that minimizes the loss.
+-   Set $s_0$, the initial state as the average clocking for all athletes in all races in the database since 2020. This only includes elite athletes who have run a time below 10.30. It is universal and is not athlete-specific.
+-   $\mu_w$ and $\sigma_w$ are optimized in such a way that minimizes the loss function. In this case, it is the negative log-likelihood function for the entire path of a single athlete.
+-   Fixing the parameter, $\beta = 1$ means that we can interpret the *unobserved fitness level* as the 100m clocking the athlete is capable of.
 -   $\sigma_v$"Naively fixing the randomness that can occur during any race as the average per-season deviation of the athletes in the database."
 
 Specifically, using standard notation:
@@ -45,11 +45,17 @@ $v_t \sim \mathcal{N}(\mu_{v}, \sigma_{v})$
 
 $\beta = 1$\
 $\mu_v = 0$\
-$\sigma_v = \hat{\sigma}_{clockings}$
+$\sigma_v = \hat{\sigma}_{clockings}$\
+
+## Results
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
-# References {#references}
+## Commentary of Model 1
+  
+Many of the assumptions do not reflect realism in this first iteration of the state-space model. Hopefully, it provides a good starting point for improvement.
+
+# References 
 
 Inspiration for code:\
 <https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing>
