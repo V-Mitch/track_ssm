@@ -6,6 +6,8 @@ Apply and understand the State-Space model approach with Bayesian Filtering. The
 
 I use several resources for running the project denoted in [the references section](#References)
 
+![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/start_100m.jpg)
+
 # Main Depiction
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/depiction_1.png)
@@ -46,7 +48,8 @@ This is naively fixing the randomness during any race as the average per-season 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
 # References 
-Inspiration for code:
+Inspiration for code:  
 https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing  
-Main resource for theory:
+
+Main resource for theory:  
 Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021.  
