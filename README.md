@@ -52,7 +52,7 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 | Name                           |   Variable   |     |              Name              |      Variable       |
 |--------------------------------|:------------:|:---:|:------------------------------:|:-------------------:|
-| ${\color{orange}{fit\:level}}$ |    $s_t$     |     | ${\color{blue}{Race\:Result}}$ |        $y_t$        |
+| ${\color{orange}{fit\ level}}$ |    $s_t$     |     | ${\color{blue}{Race\ Result}}$ |        $y_t$        |
 | fit_prog_avg                   |  $\mu_{w}$   |     |            obs_pred            | $p(y_t \| s_{t-1})$ |
 | fit_var                        | $\sigma_{w}$ |     |      Next Race Prediction      | $p(y_T \| s_{T-1})$ |
 
