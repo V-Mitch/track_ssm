@@ -2,8 +2,8 @@
 
 # Goal:
 
-Apply and understand the State-Space model approach with Bayesian Filtering. The example case is the 100m time progression of the 8 athletes who made it to the Paris 100m Olympic final.\
-- Model the progression path of each of the 8 athletes over their past 4 seasons in the 100m.\
+Apply and understand the State-Space model approach with Bayesian Filtering. The example case is the 100m time progression of the 8 athletes who made it to the Paris 100m Olympic final.
+- Model the progression path of each of the 8 athletes over their past 4 seasons in the 100m.
 - Make a prediction for the 100m final that took place at the Paris Olympics 2024 on August 4th using only data from before that day.
 
 I use several resources for running the project denoted in [the references section](#References)
@@ -51,7 +51,7 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 ## Results of Model 1
 
 | Name                           |   Variable   |     |              Name              |      Variable       |
-|--------------------------------|:------------:|:---:|:------------------------------:|:-------------------:|
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
 | ${\color{orange}{fit\ level}}$ |    $s_t$     |     | ${\color{blue}{Race\ Result}}$ |        $y_t$        |
 | fit_prog_avg                   |  $\mu_{w}$   |     |            obs_pred            | $p(y_t \| s_{t-1})$ |
 | fit_var                        | $\sigma_{w}$ |     |      Next Race Prediction      | $p(y_T \| s_{T-1})$ |
@@ -67,7 +67,7 @@ In order of importance the following most important points are not yet accounted
 - Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend.\
 - As the fitness level improves, it becomes increasingly difficult to make incremental improvements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
 
-# References {#references}
+# References
 
 Inspiration for code:\
 <https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing>
