@@ -50,14 +50,14 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 ## Results of Model 1
 
-| Name                 |      Variable      |
-|----------------------|:------------------:|
-| fit_level            |       $s_t$        |
-| fit_prog_avg         |     $\mu_{w}$      |
-| fit_var              |    $\sigma_{w}$    |
-| Race Result          |       $y_t$        |
-| obs_pred             | $p(y_t | s_{t-1})$ |
-| Next Race Prediction | $p(y_T | s_{T-1})$ |
+| Name                 |       Variable       |
+|----------------------|:--------------------:|
+| fit_level            |        $s_t$         |
+| fit_prog_avg         |      $\mu_{w}$       |
+| fit_var              |     $\sigma_{w}$     |
+| Race Result          |        $y_t$         |
+| obs_pred             | $$p(y_t | s_{t-1})$$  |
+| Next Race Prediction | $$p(y_T | s_{T-1})$$  |
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
