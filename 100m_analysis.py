@@ -5,11 +5,12 @@ pd.set_option('display.max_columns', None)
 from datetime import datetime
 import tensorflow as tf
 import tensorflow_probability as tfp
-import matplotlib.pyplot as plt
-from optimize_transmission_noise import optimize_transmission_noise
-from plot_tfp_kalman_s import plot_tfp_kalman_s
-from plot_tfp_kalman_s import plot_single_kalman_s
 tfd = tfp.distributions
+import matplotlib.pyplot as plt
+from optimize_transmission_noise import *
+from plot_tfp_kalman_s import *
+from build_ssm import *
+from putils import *
 
 df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-09-30.csv')
 
@@ -18,6 +19,9 @@ def convert_dates(date):
         return pd.to_datetime(date, format='%d %b %Y')
     except ValueError:
         return pd.to_datetime(date, format='%Y', errors='coerce')  
+      
+df_raw['DOB'] = df_raw['DOB'].apply(convert_dates)
+df_raw['Date'] = df_raw['Date'].apply(convert_dates)
 
 # Analysis      
 avg_std = df_raw.groupby(['Competitor', df_raw['Date'].dt.year])['Mark'].std().mean().round(4)
@@ -28,8 +32,6 @@ seas_improvements = max_seas - min_seas
 improvement_avg = (max_seas - min_seas).mean().round(4)  
 improvement_avg = df_raw.groupby(['Competitor'])['Mark'].diff().mean()
       
-df_raw['DOB'] = df_raw['DOB'].apply(convert_dates)
-df_raw['Date'] = df_raw['Date'].apply(convert_dates)
 
 # Only interested in the line-up of the 2024 olympics race
 competitors = ['Noah LYLES', 'Kishane THOMPSON', 'Fred KERLEY', 
@@ -48,51 +50,31 @@ def df_by_athlete(data):
 personal_df_list = df_by_athlete(df_spec)
 
 params = {
-    'obs_coeff': 1,
+    'obs_coeff': 1.00,
     's_mu': -float(improvement_avg),
     's_cov': 0.01,
     'init_s_mu': float(mean_std),
     'init_s_cov': 0.05,
-    'obs_mu': 0,
+    'obs_mu': 0.00,
     'obs_cov': float(avg_std)  
 }
-
-def build_tfp_lg_ssm(num_timesteps: int, params: dict):
-  
-  obs_coeff = params.get('obs_coeff', 1)
-  s_mu = params.get('s_mu', -0.02)
-  s_cov = params.get('s_cov', 0.05)
-  obs_mu = params.get('obs_mu', 1)
-  init_s_mu = params.get('init_s_mu', 10)
-  init_s_cov = params.get('init_s_cov', 0.05)
-  obs_cov = params.get('obs_cov', 0.05)
-  
-  transition_matrix = [[1.]]
-  observation_matrix = [[obs_coeff]]
-  transition_noise = tfd.MultivariateNormalDiag(
-      loc = [tf.convert_to_tensor(s_mu)],
-      scale_diag= [tf.convert_to_tensor(s_cov)])
-  observation_noise = tfd.MultivariateNormalDiag(
-      loc = [obs_mu],
-      scale_diag = [obs_cov])
-  initial_state_prior = tfd.MultivariateNormalDiag(
-      loc =[init_s_mu], 
-      scale_diag = [init_s_cov])
-  model = tfd.LinearGaussianStateSpaceModel(
-    num_timesteps=num_timesteps,
-    transition_matrix=transition_matrix,
-    transition_noise=transition_noise,
-    observation_matrix=observation_matrix,
-    observation_noise=observation_noise,
-    initial_state_prior=initial_state_prior)
-  
-  return model
 
 
 results = {}
 
 # Create a figure with side-by-side plots
 fig, ax = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns
+
+obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark'])[:, np.newaxis]
+
+# Make a tensorflow dataset
+X_train = tf.data.Dataset.from_tensors(obs_true)
+x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
+model = build_tfp_lg_ssm(len(obs_true), params)
+model = build_linear_gaussian_jdc(len(obs_true), params)
+
+L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+  model.forward_filter(x, final_step_only=False)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
@@ -126,7 +108,7 @@ for i, competitor in enumerate(personal_df_list):
     x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
     print(f"{competitor}: {x.shape}")
     opt_params = optimize_transmission_noise(params = params,
-    build_tfp_lg_ssm = build_tfp_lg_ssm,
+    build_function = build_tfp_lg_ssm,
     x = x)
     # opt_params = params
     L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = model.forward_filter(x, final_step_only=False)
