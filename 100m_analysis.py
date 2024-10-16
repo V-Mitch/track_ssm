@@ -1,4 +1,5 @@
 
+
 import pandas as pd
 import numpy as np
 pd.set_option('display.max_columns', None)
@@ -71,10 +72,13 @@ obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark'])[:, np.newaxis]
 X_train = tf.data.Dataset.from_tensors(obs_true)
 x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
 model = build_tfp_lg_ssm(len(obs_true), params)
-model = build_linear_gaussian_jdc(len(obs_true), params)
+model_nl = build_linear_gaussian_jdc(len(obs_true), params)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
   model.forward_filter(x, final_step_only=False)
+  
+L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+  forward_filter_nl(model_nl, params, x)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,

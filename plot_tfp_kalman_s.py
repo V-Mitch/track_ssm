@@ -74,21 +74,27 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     obs_coeff, predicted_means, observation_means, observation_covs, obs_mu):
     x_axis = np.arange(len(filtered_means))
 
-    # Calculate predicted observations
-    obs_predictions = observation_means.numpy().flatten()
+   # Ensure all inputs are numpy arrays and flattened
+    obs_predictions = np.asarray(observation_means).flatten()
+    obs_true = np.asarray(obs_true).flatten()
+    filtered_means = np.asarray(filtered_means).flatten()
+    filtered_covs = np.asarray(filtered_covs).flatten()
+    
+    # Flattening observation_covs to be 1D
+    observation_covs = np.asarray(observation_covs).reshape(-1)  # This will turn (25, 1, 1) into (25,)
 
     # Calculate prediction intervals
-    lower_bound = obs_predictions - 1.96 * np.sqrt(observation_covs.numpy().flatten())  # 95% prediction interval lower bound
-    upper_bound = obs_predictions + 1.96 * np.sqrt(observation_covs.numpy().flatten())  # 95% prediction interval upper bound
+    lower_bound = obs_predictions - 1.96 * np.sqrt(observation_covs)  # 95% prediction interval lower bound
+    upper_bound = obs_predictions + 1.96 * np.sqrt(observation_covs)  # 95% prediction interval upper bound
 
     # Plot the filtered state estimates
-    ax[0].plot(x_axis, filtered_means.flatten(), label='s_kf_estimate', color='orange')
+    ax[0].plot(x_axis, filtered_means, label='s_kf_estimate', color='orange')
     ax[0].legend(loc='best')
     ax[0].set_title('Filtered State Estimates')
 
     # Plot the predicted observations
     ax[1].plot(x_axis, obs_predictions, label='obs_kf_pred', linestyle='--', color='#33FF57')
-    ax[1].plot(x_axis, obs_true.flatten(), label='obs_true', color='blue')  # Plot true observations for comparison
+    ax[1].plot(x_axis, obs_true, label='obs_true', color='blue')  # Plot true observations for comparison
 
     # Shade the prediction intervals
     ax[1].fill_between(x_axis, lower_bound, upper_bound, color='lightgreen', alpha=0.5, label='Prediction Interval')
