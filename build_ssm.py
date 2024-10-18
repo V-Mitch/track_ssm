@@ -12,21 +12,25 @@ def build_tfp_lg_ssm(num_timesteps: int, params: dict):
   s_mu = params.get('s_mu', -0.02)
   s_cov = params.get('s_cov', 0.05)
   obs_mu = params.get('obs_mu', 1)
-  init_s_mu = params.get('init_s_mu', 10)
+  init_s_mu = params.get('init_s_mu', 10.2185)
   init_s_cov = params.get('init_s_cov', 0.05)
   obs_cov = params.get('obs_cov', 0.05)
+  
+  obs_std = float(np.sqrt(obs_cov))
+  init_s_std = float(np.sqrt(init_s_cov))
+  s_std = float(np.sqrt(s_cov))
   
   transition_matrix = [[1.]]
   observation_matrix = [[obs_coeff]]
   transition_noise = tfd.MultivariateNormalDiag(
       loc = [tf.convert_to_tensor(s_mu)],
-      scale_diag= [tf.convert_to_tensor(s_cov)])
+      scale_diag= [tf.convert_to_tensor(s_std)])
   observation_noise = tfd.MultivariateNormalDiag(
       loc = [obs_mu],
-      scale_diag = [obs_cov])
+      scale_diag = [obs_std])
   initial_state_prior = tfd.MultivariateNormalDiag(
       loc =[init_s_mu], 
-      scale_diag = [init_s_cov])
+      scale_diag = [init_s_std])
   model = tfd.LinearGaussianStateSpaceModel(
     num_timesteps=num_timesteps,
     transition_matrix=transition_matrix,
@@ -100,30 +104,30 @@ def forward_filter_nl(non_linear_ssm, params, observations):
     
     for t in range(num_timesteps):
         # Predict step
-        predicted_state_mean = current_state_mean  # Non-linear transition function
+        predicted_state_mean = current_state_mean + s_mu  # Non-linear transition function
         
         # Assume transition noise as some constant for now
         transition_noise = tf.convert_to_tensor(s_cov)  
-        predicted_state_cov =  transition_noise  # Add transition noise
+        predicted_state_cov = obs_coeff * current_state_cov * obs_coeff + transition_noise  # Add transition noise
         
         # Observation prediction (non-linear emission)
         predicted_obs_mean = obs_coeff * predicted_state_mean + obs_mu
         observation_noise = tf.convert_to_tensor(obs_cov)  # Assume some constant observation noise
-        predicted_obs_cov = observation_noise  # Add observation noise
+        predicted_obs_cov = obs_coeff * predicted_state_cov * obs_coeff + observation_noise  # Add observation noise
         
         # Store predictions
         predicted_means.append(tf.convert_to_tensor(predicted_state_mean, dtype=tf.float32))
-        predicted_covs.append(tf.convert_to_tensor(predicted_state_cov, dtype=tf.float32))
+        predicted_covs.append(tf.convert_to_tensor(predicted_state_cov , dtype=tf.float32))
         observation_means.append(tf.convert_to_tensor(predicted_obs_mean, dtype=tf.float32))
-        observation_covs.append(tf.convert_to_tensor(predicted_obs_cov, dtype=tf.float32))
+        observation_covs.append(tf.convert_to_tensor(predicted_obs_cov , dtype=tf.float32))
         
         # Observation update (using observations)
         innovation = observations[t] - predicted_obs_mean
-        kalman_gain = kalman_gain = predicted_state_cov / (predicted_state_cov + observation_noise)
+        kalman_gain = kalman_gain = predicted_state_cov / (predicted_obs_cov)
         
         # Update current state mean and covariance
         current_state_mean = predicted_state_mean + kalman_gain * innovation
-        current_state_cov = (1 - kalman_gain) * predicted_state_cov
+        current_state_cov = (1 - kalman_gain * obs_coeff) * predicted_state_cov
         
         # Store filtered estimates
         filtered_means.append(tf.convert_to_tensor(current_state_mean, dtype=tf.float32))
