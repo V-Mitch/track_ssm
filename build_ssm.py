@@ -160,3 +160,79 @@ def forward_filter_nl(non_linear_ssm, params, observations):
 # Example forward filtering call
 # observations = tf.random.normal([num_timesteps, 1])  # Mock observation data
 # dict_nl = forward_filter_nl(model, obs_true)
+
+def forward_filter_lgssm(non_linear_ssm, params, observations):
+    """ Perform filtering for the non-linear state-space model with multivariate states. """
+    num_timesteps = observations.shape[0]
+    
+    # Extracting the parameters for multivariate states
+    obs_coeff = tf.convert_to_tensor(params['obs_coeff'], dtype=tf.float32)  # Now a matrix (or vector)
+    obs_mu = tf.convert_to_tensor(params['obs_mu'], dtype=tf.float32)  # Now a vector
+    obs_cov = tf.convert_to_tensor(params['obs_cov'], dtype=tf.float32)  # Covariance matrix for observation noise
+    s_mu = tf.convert_to_tensor(params['s_mu'], dtype=tf.float32)  # Now a vector for state mean shift
+    s_cov = tf.convert_to_tensor(params['s_cov'], dtype=tf.float32)  # Covariance matrix for transition noise
+    init_s_cov = tf.convert_to_tensor(params['init_s_cov'], dtype=tf.float32)  # Initial state covariance matrix
+    init_s_mu = tf.convert_to_tensor(params['init_s_mu'], dtype=tf.float32)  # Initial state mean vector
+    
+    # Initial state prior
+    sample_output = non_linear_ssm.sample()  # Sample from the model
+    
+    current_state_mean = tf.expand_dims(init_s_mu, axis=1)  # Initial mean as a column vector
+    current_state_cov = init_s_cov  # Set initial covariance matrix
+
+    filtered_means = []
+    filtered_covs = []
+    predicted_means = []
+    predicted_covs = []
+    observation_means = []
+    observation_covs = []
+    likelihoods = []
+    
+    for t in range(num_timesteps):
+        # Predict step (state mean and covariance)
+        predicted_state_mean = current_state_mean + tf.expand_dims(s_mu, axis=1)  # Non-linear transition function (shift state mean)
+        predicted_state_cov = current_state_cov + s_cov  # Add transition noise covariance
+        
+        # Observation prediction (mean and covariance)
+        predicted_obs_mean = obs_coeff @ predicted_state_mean + tf.expand_dims(obs_mu, axis=1)  # Observation model
+        predicted_obs_cov = obs_coeff @ predicted_state_cov @ tf.transpose(obs_coeff) + obs_cov  # Add observation noise covariance
+        
+        # Store predictions
+        predicted_means.append(predicted_state_mean)
+        predicted_covs.append(predicted_state_cov)
+        observation_means.append(predicted_obs_mean)
+        observation_covs.append(predicted_obs_cov)
+        
+        # Observation update (Kalman gain, state update)
+        innovation = tf.expand_dims(observations[t], axis=1) - predicted_obs_mean  # Innovation term (difference between observed and predicted)
+        kalman_gain = predicted_state_cov @ tf.transpose(obs_coeff) @ tf.linalg.inv(predicted_obs_cov)  # Kalman gain
+        
+        # Update current state mean and covariance
+        current_state_mean = predicted_state_mean + kalman_gain @ innovation  # Update mean
+        current_state_cov = (tf.eye(tf.shape(kalman_gain)[0]) - kalman_gain @ obs_coeff) @ predicted_state_cov  # Update covariance
+        
+        # Store filtered estimates
+        filtered_means.append(current_state_mean)
+        filtered_covs.append(current_state_cov)
+        
+        # Calculate likelihood for the current time step
+        likelihood = -0.5 * (tf.linalg.logdet(2 * np.pi * predicted_obs_cov) + 
+                             tf.transpose(innovation) @ tf.linalg.inv(predicted_obs_cov) @ innovation)
+        likelihoods.append(likelihood)
+    
+    # Convert lists to tensors and check their shapes
+    filtered_means_tensor = tf.stack([tf.squeeze(fm) for fm in filtered_means], axis=0)  # Remove extra dimension
+    filtered_covs_tensor = tf.stack(filtered_covs, axis=0)
+    predicted_means_tensor = tf.stack([tf.squeeze(pm) for pm in predicted_means], axis=0)  # Remove extra dimension
+    predicted_covs_tensor = tf.stack(predicted_covs, axis=0)
+    observation_means_tensor = tf.stack([tf.squeeze(om) for om in observation_means], axis=0)  # Remove extra dimension
+    observation_covs_tensor = tf.stack(observation_covs, axis=0)
+    likelihoods_tensor = tf.stack(likelihoods, axis=0)
+
+    return (likelihoods_tensor, 
+            filtered_means_tensor, 
+            filtered_covs_tensor,
+            predicted_means_tensor, 
+            predicted_covs_tensor, 
+            observation_means_tensor,
+            observation_covs_tensor)

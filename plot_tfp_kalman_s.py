@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, observation_covs, 
                       params, competitor, n_steps):
@@ -14,16 +15,20 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     lower_bound = observation_means.numpy().flatten() - 1.96 * np.sqrt(observation_covs.numpy().flatten())
     upper_bound = observation_means.numpy().flatten() + 1.96 * np.sqrt(observation_covs.numpy().flatten())
 
+    # Calculate MSE
+    mse = np.mean(np.square(obs_true.flatten() - observation_means.numpy().flatten()))
+
     # Plot the filtered state estimates
     ax_row[0].plot(x_axis, filtered_means.numpy().flatten(), label='fit_level', color='orange')
     ax_row[0].legend(loc='lower left', ncol=1)
     ax_row[0].set_title(f'{competitor} - Filtered State Estimates')
     ax_row[0].set_ylim(bottom=9.2)  # Adjust y-axis as needed
 
-    # Add fitness_progression_avg, fitness_variability, and number_of_races as text annotations on the left graph
+    # Add fitness_progression_avg, fitness_variability, number_of_races, and MSE as text annotations on the left graph
     textstr = (f'fit_prog_avg: {s_mu:.4f}\n'
                f'fit_var: {s_cov:.4f}\n'
-               f'n_races: {n_steps}')
+               f'n_races: {n_steps}\n'
+               f'MSE: {mse:.4f}')
                
     ax_row[0].text(0.95, 0.05, textstr, transform=ax_row[0].transAxes, fontsize=10,
                    verticalalignment='bottom', horizontalalignment='right',
@@ -63,18 +68,19 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
                             color='lightcoral', alpha=0.5, label='Next Obs Prediction Interval')
     ax_row[1].plot(x_values_next, predicted_display_mean, label=f'Next Race Prediction: {predicted_next_mean_display}', linestyle='--', color='coral')
     
-    # Plot the predicted next observation as a continuation
-    # ax_row[1].plot(len(filtered_means), predicted_next_mean, 'o', color='lightcoral', label='Predicted Next Obs')
+    # Create a legend entry for the MSE
+    mse_patch = mpatches.Patch(color='none', label=f'MSE: {mse:.4f}')
 
-    ax_row[1].legend(loc='best', fontsize=6, ncol=2)
+    # Add MSE to the legend along with existing plot items
+    ax_row[1].legend(handles=[*ax_row[1].get_legend_handles_labels()[0], mse_patch], loc='best', fontsize=6, ncol=2)
+
     ax_row[1].set_title(f'{competitor} - Predicted vs True Observations')
     ax_row[1].set_ylim(bottom=9.2)  # Ensure y-axis is the same for comparison
 
 def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     obs_coeff, predicted_means, observation_means, observation_covs, obs_mu):
-    x_axis = np.arange(len(filtered_means))
-
-   # Ensure all inputs are numpy arrays and flattened
+    
+    # Ensure all inputs are numpy arrays and flattened
     obs_predictions = np.asarray(observation_means).flatten()
     obs_true = np.asarray(obs_true).flatten()
     filtered_means = np.asarray(filtered_means).flatten()
@@ -87,7 +93,11 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     lower_bound = obs_predictions - 1.96 * np.sqrt(observation_covs)  # 95% prediction interval lower bound
     upper_bound = obs_predictions + 1.96 * np.sqrt(observation_covs)  # 95% prediction interval upper bound
 
+    # Calculate Mean Squared Error (MSE)
+    mse = np.mean(np.square(obs_true - obs_predictions))
+
     # Plot the filtered state estimates
+    x_axis = np.arange(len(filtered_means))
     ax[0].plot(x_axis, filtered_means, label='s_kf_estimate', color='orange')
     ax[0].legend(loc='best')
     ax[0].set_title('Filtered State Estimates')
@@ -99,5 +109,10 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     # Shade the prediction intervals
     ax[1].fill_between(x_axis, lower_bound, upper_bound, color='lightgreen', alpha=0.5, label='Prediction Interval')
 
-    ax[1].legend(loc='best')
+    # Create a legend entry for the MSE (as a patch)
+    mse_patch = mpatches.Patch(color='none', label=f'MSE: {mse:.4f}')
+
+    # Add MSE to the legend along with existing plot items
+    ax[1].legend(handles=[*ax[1].get_legend_handles_labels()[0], mse_patch], loc='best')
+
     ax[1].set_title('Predicted Observations vs True Observations')
