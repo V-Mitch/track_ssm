@@ -77,7 +77,7 @@ def build_linear_gaussian_jdc(num_timesteps, params):
 
     return tfd.JointDistributionCoroutine(model)
 
-def forward_filter_nl(non_linear_ssm, params, observations):
+def forward_filter_lgssm(non_linear_ssm, params, observations):
     """ Perform filtering for the non-linear state-space model. """
     num_timesteps = observations.shape[0]
     

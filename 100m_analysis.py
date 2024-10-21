@@ -53,11 +53,12 @@ personal_df_list = df_by_athlete(df_spec)
 params = {
     'obs_coeff': 1.00,
     's_mu': -float(improvement_avg),
-    's_cov': 0.01,
+    # 's_mu': 0.00,
+    's_cov': 0.01 ** 2,
     'init_s_mu': float(mean_std),
-    'init_s_cov': 0.05,
+    'init_s_cov': 0.05 ** 2,
     'obs_mu': 0.00,
-    'obs_cov': float(avg_std)  
+    'obs_cov': float(avg_std) ** 2
 }
 
 
@@ -72,13 +73,13 @@ obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark'])[:, np.newaxis]
 X_train = tf.data.Dataset.from_tensors(obs_true)
 x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
 model = build_tfp_lg_ssm(len(obs_true), params)
-model_nl = build_linear_gaussian_jdc(len(obs_true), params)
+model_lgssm = build_linear_gaussian_jdc(len(obs_true), params)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
   model.forward_filter(x, final_step_only=False)
   
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_nl(model_nl, params, x)
+  forward_filter_lgssm(model_nl, params, x)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
