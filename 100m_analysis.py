@@ -13,7 +13,7 @@ from plot_tfp_kalman_s import *
 from build_ssm import *
 from putils import *
 
-df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-09-30.csv')
+df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-10-17.csv')
 
 def convert_dates(date):
     try:
@@ -61,7 +61,7 @@ params = {
     'obs_cov': float(avg_std) ** 2
 }
 
-
+  
 results = {}
 
 # Create a figure with side-by-side plots
@@ -81,6 +81,9 @@ L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_m
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
   forward_filter_lgssm(model_nl, params, x)
 
+L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+  forward_filter_lgssm(model_nl, params, x)
+
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
                    predicted_means=predicted_means.numpy(),
@@ -92,6 +95,7 @@ plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
                    obs_mu=params.get('obs_mu', 1))
 
 plt.tight_layout()
+plt.savefig('single_path_kalman_plot.png')
 plt.show()
 
 
