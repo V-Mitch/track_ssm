@@ -66,11 +66,32 @@ In order of importance the following most important points are not yet accounted
 - The runners do not exert full effort in races for qualifications or where the stakes are lower to avoid injury and preserve strength for later races or stages.
 - Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend.
 - As the fitness level improves, it becomes increasingly difficult to make incremental improvements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
+- Wind is not accounted for. At each race, it is known that a wind blowing against a runner will slow them down whereas a wind blowing behind them will speed them up. 
+  
+# Model 2:
+
+## Assumptions of Model 2
+
+- I stick to the same assumptions as model 1 but in the frame of mind of changing on small thing at a time, I change the $y_t$ variable from being the race result to a race result "modified for wind". Essentially, I decided to borrow the results of the Moinat paper that determines that a 100m corrected time for wind can be determined by the following equation:
+
+$$ \delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
+
+## Results of Model 2
+
+| Name                           | State Variable |     |              Name              | Observation Variable |
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
+| ${\color{orange}{fit\ level}}$ |     $s_t$      |     | ${\color{red}{Race\ Result}}$ |        not used         |
+| fit_prog_avg                   |   $\mu_{w}$    |     |            obs_pred            | $p(y_t \| s_{t-1})$  |
+| fit_var                        |  $\sigma_{w}$  |     |      Next Race Prediction      | $p(y_T \| s_{T-1})$  |
+| fit_var                        |  $\sigma_{w}$  |     |      ${\color{red}{Wind\ Adjusted Result}}$      | $y_t$  |
+
+![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_2.png)
 
 # References
 
 Inspiration for code:
 <https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing>
 
-Main resource for theory:
+Theory:
 Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021.
+Moinat M, Fabius O, Emanuel KS. *Data-driven quantification of the effect of wind on athletics performance.* Eur J Sport Sci. 2018 Oct;18(9):1185-1190. doi: 10.1080/17461391.2018.1480062. Epub 2018 Jun 11. PMID: 29890896.

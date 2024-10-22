@@ -12,6 +12,7 @@ from optimize_transmission_noise import *
 from plot_tfp_kalman_s import *
 from build_ssm import *
 from putils import *
+from add_wind_mark import *
 
 df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-09-30.csv')
 
@@ -43,6 +44,8 @@ date_max = pd.to_datetime('2024-08-03')
 df_spec = df_raw[df_raw['Date'] <= date_max]
 df_spec = df_spec[df_spec['Competitor'].isin(competitors)]
 
+df_spec = add_wind_mark(df_spec)
+
 def df_by_athlete(data):
   data_sorted = data.sort_values(by=['Competitor', 'Date'])
   competitor_dfs = {name: group for name, group in data_sorted.groupby('Competitor')}
@@ -67,7 +70,7 @@ results = {}
 # Create a figure with side-by-side plots
 fig, ax = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns
 
-obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark'])[:, np.newaxis]
+obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark_wm'])[:, np.newaxis]
 
 # Make a tensorflow dataset
 X_train = tf.data.Dataset.from_tensors(obs_true)
@@ -77,9 +80,9 @@ model_lgssm = build_linear_gaussian_jdc(len(obs_true), params)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
   model.forward_filter(x, final_step_only=False)
-  
-L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_lgssm(model_lgssm, params, x)
+#   
+# L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+#   forward_filter_lgssm(model_lgssm, params, x)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
   forward_filter_lgssm_mv(model_lgssm, params, x)
@@ -110,7 +113,8 @@ fig, ax = plt.subplots(num_rows, num_cols, figsize=(8, 16), dpi=300)  # 2 column
 for i, competitor in enumerate(personal_df_list):
     n_steps = personal_df_list[competitor].shape[0]
     model = build_tfp_lg_ssm(params=params, num_timesteps=n_steps)
-    obs_true = np.array(personal_df_list[competitor]['Mark'])[:, np.newaxis]
+    obs_true = np.array(personal_df_list[competitor]['Mark_wm'])[:, np.newaxis]
+    obs_alter = np.array(personal_df_list[competitor]['Mark'])[:, np.newaxis]
     
     # Make a tensorflow dataset
     X_train = tf.data.Dataset.from_tensors(obs_true)
@@ -124,7 +128,7 @@ for i, competitor in enumerate(personal_df_list):
     
     ax_row = ax[i, :]
 
-    plot_tfp_kalman_s(ax[i, :], obs_true, filtered_means, observation_means, observation_covs, 
+    plot_tfp_kalman_s2(ax[i, :], obs_true, obs_alter, filtered_means, observation_means, observation_covs, 
                       opt_params, competitor, n_steps=n_steps)
 
 plt.tight_layout()
