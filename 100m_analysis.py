@@ -13,7 +13,7 @@ from plot_tfp_kalman_s import *
 from build_ssm import *
 from putils import *
 
-df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-10-17.csv')
+df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-09-30.csv')
 
 def convert_dates(date):
     try:
@@ -79,10 +79,10 @@ L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_m
   model.forward_filter(x, final_step_only=False)
   
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_lgssm(model_nl, params, x)
+  forward_filter_lgssm(model_lgssm, params, x)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_lgssm(model_nl, params, x)
+  forward_filter_lgssm_mv(model_lgssm, params, x)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
