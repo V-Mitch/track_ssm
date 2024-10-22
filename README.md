@@ -91,6 +91,8 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 | fit_var                        |  $\sigma_{w}$  |     |          Next Race Prediction           | $p(y_T \| s_{T-1})$  |
 |                                |                |     | ${\color{blue}{Wind-Corrected Result}}$ |        $y_t$         |
 
+![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_2.png)
+
 ## Commentary of Model 2 and Discussion
   
 
