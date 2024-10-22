@@ -78,7 +78,7 @@ In order of importance the following most important points are not yet accounted
 
 ## Assumptions of Model 2
 
--   I stick to the same assumptions as model 1 but I change the $y_t$ variable from being the race result to a race result "modified for wind". Essentially, I decided to borrow the results of the *Moinat* paper that determines that a 100m corrected time for wind can be determined by the following equation:
+-   I stick to the same assumptions as model 1 but I change the $y_t$ variable from being the race result to a race result "modified for wind". Essentially, I decided to borrow the results of the *Moinat* paper that determines that the *change* in a  100m time due to wind can be determined by the following equation:
 
 $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 
