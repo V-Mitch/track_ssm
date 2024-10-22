@@ -6,9 +6,8 @@ Apply and understand the State-Space model approach with Bayesian Filtering. The
 
 -   Model the progression path of each of the 8 athletes over their past 4 seasons in the 100m.
 
-```{=html}
 <!-- -->
-```
+
 -   Make a prediction for the 100m final that took place at the Paris Olympics 2024 on August 4th using only data from before that day.
 
 I use several resources for running the project denoted in [the references section](#References)
@@ -61,17 +60,19 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
 
-## Commentary of Model 1
+## Commentary of Model 1 and Discussion
 
 Many of the assumptions do not reflect realism in this first iteration of the state-space model. Hopefully, it provides a good starting point for improvement.
 
 In order of importance the following most important points are not yet accounted for correctly. These initial observations are from general knowledge of the sport:
 
--    The runners do not exert full effort in races for qualifications or where the stakes are lower to avoid injury and preserve strength for later races or stages.
+-   The runners do not exert full effort in races for qualifications or where the stakes are lower to avoid injury and preserve strength for later races or stages.
 
--    Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend. - As the fitness level improves, it becomes increasingly difficult to make incremental improvements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
+-   Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend. - As the fitness level improves, it becomes increasingly difficult to make incremental improvements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
 
--    Wind is not accounted for. At each race, it is known that a wind blowing against a runner will slow them down whereas a wind blowing behind them will speed them up.
+-   From my observation and experience it seems as though the distribution of performances is likely negatively skewed and not normally distributed. It is more likely for a blunder to happen every so often whereas a "perfect" race is only marginally better than the average performance.
+
+-   Wind is not accounted for. At each race, it is known that a wind blowing against a runner will slow them down whereas a wind blowing behind them will speed them up.
 
 # Model 2:
 
@@ -88,9 +89,26 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 | ${\color{orange}{fit\ level}}$ |     $s_t$      |     |      ${\color{red}{Race\ Result}}$      |       not used       |
 | fit_prog_avg                   |   $\mu_{w}$    |     |                obs_pred                 | $p(y_t \| s_{t-1})$  |
 | fit_var                        |  $\sigma_{w}$  |     |          Next Race Prediction           | $p(y_T \| s_{T-1})$  |
-|                                |                |     | ${\color{blue}{Wind\ Adjusted Result}}$ |        $y_t$         |
+|                                |                |     | ${\color{blue}{Wind-Corrected Result}}$ |        $y_t$         |
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_2.png)
+## Commentary of Model 2 and Discussion
+  
+
+
+# Race Result and the predicted times of each version
+
+| Runner   | Time  | Model 1 | Model 2 |
+|----------|-------|---------|---------|
+| LYLES    | 9.784 | 9.79    | 9.81    |
+| THOMPSON | 9.789 | 9.83    | 9.84    |
+| KERLEY   | 9.81  | 9.90    | 9.91    |
+| SIMBINE  | 9.82  | 9.90    | 9.89    |
+| JACOBS   | 9.85  | 9.92    | 9.95    |
+| TEBOGO   | 9.86  | 9.94    | 9.95    |
+| BEDNAREK | 9.88  | 9.91    | 9.94    |
+| SEVILLE  | 9.91  | 9.82    | 9.83    |
+
+![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/finish_100m.jpg)
 
 # References {#references}
 
@@ -100,7 +118,6 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 
 -   Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021.
 
-```{=html}
 <!-- -->
-```
+
 -   Moinat M, Fabius O, Emanuel KS. *Data-driven quantification of the effect of wind on athletics performance.* Eur J Sport Sci. 2018 Oct;18(9):1185-1190. doi: 10.1080/17461391.2018.1480062. Epub 2018 Jun 11. PMID: 29890896.
