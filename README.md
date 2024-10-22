@@ -94,6 +94,13 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 
 # References {#references}
 
-Inspiration for code: <https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing>
+*Inspiration for code*: <https://colab.research.google.com/drive/1TdVykmUdLp8Qzr5-4XnG1Seov6HhSgPc?usp=sharing>
 
-Theory: Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021. Moinat M, Fabius O, Emanuel KS. *Data-driven quantification of the effect of wind on athletics performance.* Eur J Sport Sci. 2018 Oct;18(9):1185-1190. doi: 10.1080/17461391.2018.1480062. Epub 2018 Jun 11. PMID: 29890896.
+*Theory*:
+
+-   Hagiwara, Junichiro. *Time Series Analysis for the State-Space Model with R/Stan. Springer EBooks*, Springer Nature, 1 Jan. 2021.
+
+```{=html}
+<!-- -->
+```
+-   Moinat M, Fabius O, Emanuel KS. *Data-driven quantification of the effect of wind on athletics performance.* Eur J Sport Sci. 2018 Oct;18(9):1185-1190. doi: 10.1080/17461391.2018.1480062. Epub 2018 Jun 11. PMID: 29890896.
