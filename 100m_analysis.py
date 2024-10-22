@@ -132,6 +132,6 @@ for i, competitor in enumerate(personal_df_list):
                       opt_params, competitor, n_steps=n_steps)
 
 plt.tight_layout()
-plt.savefig('competitor_kalman_plots.png')  # Save the combined plot
+plt.savefig('competitor_kalman_plots_2.png')  # Save the combined plot
 plt.show()
 
