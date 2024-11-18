@@ -158,7 +158,7 @@ def forward_filter_lgssm(non_linear_ssm, params, observations):
             observation_means_tensor,
             observation_covs_tensor)
     
-def forward_filter_lgssm_mv(non_linear_ssm, params, observations):
+def forward_filter_lgssm_mv(observations, params):
     """ Perform filtering for a multivariate state-space model. """
     num_timesteps = observations.shape[0]
     

@@ -7,8 +7,9 @@ from datetime import datetime
 import tensorflow as tf
 import tensorflow_probability as tfp
 import matplotlib.pyplot as plt
+from build_ssm import *
 
-def optimize_transmission_noise(params: dict, build_function: callable, x: tf.Tensor,
+def optimize_transmission_noise(params: dict, x: tf.Tensor, ssm: callable,
 initial_lr = 0.02, num_epochs = 80, decay_factor = 0.1, decay_epoch = 50):
 
   # Initial parameters dictionary
@@ -18,7 +19,7 @@ initial_lr = 0.02, num_epochs = 80, decay_factor = 0.1, decay_epoch = 50):
   s_mu = tf.Variable(initial_params['s_mu'], dtype=tf.float32)
   s_cov = tf.Variable(initial_params['s_cov'], dtype=tf.float32)
   
-  optimizer = tf.optimizers.Adam(learning_rate=0.01)
+  optimizer = tf.optimizers.Adam(learning_rate=0.05)
   
   # Optimization loop
   for epoch in range(num_epochs):
@@ -36,8 +37,12 @@ initial_lr = 0.02, num_epochs = 80, decay_factor = 0.1, decay_epoch = 50):
               'init_s_cov': initial_params['init_s_cov'],
               'obs_cov': initial_params['obs_cov']  
           }
-          model = build_function(num_timesteps=x.shape[0], params=params)
-          L, _, _, _, _, _, _ = model.forward_filter(x, final_step_only=True)
+          # model = build_function(num_timesteps=x.shape[0], params=params)
+          # L, _, _, _, _, _, _ = model.forward_filter(x, final_step_only=True)
+          # loss = -L
+          
+          # model = build_function(num_timesteps=x.shape[0], params=params)
+          L, _, _, _, _, _, _ = forward_filter_lgssm_mv(x, params = params)
           loss = -L
           
       grads = tape.gradient(loss, [s_mu, s_cov])

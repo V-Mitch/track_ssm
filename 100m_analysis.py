@@ -85,7 +85,7 @@ L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_m
 #   forward_filter_lgssm(model_lgssm, params, x)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_lgssm_mv(model_lgssm, params, x)
+  forward_filter_lgssm_mv( params, x)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
@@ -120,10 +120,12 @@ for i, competitor in enumerate(personal_df_list):
     X_train = tf.data.Dataset.from_tensors(obs_true)
     x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
     print(f"{competitor}: {x.shape}")
-    opt_params = optimize_transmission_noise(params = params,
-    build_function = build_tfp_lg_ssm,
-    x = x)
-    # opt_params = params
+    opt_params = optimize_transmission_noise(x = x, params = params, ssm = forward_filter_lgssm_mv)
+    
+    # opt_params = optimize_transmission_noise(params = params,
+    # build_function = forward_filter_lgssm_mv,
+    # x = x)
+    
     L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = model.forward_filter(x, final_step_only=False)
     
     ax_row = ax[i, :]
