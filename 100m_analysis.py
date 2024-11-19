@@ -147,13 +147,13 @@ plt.show()
 
 
 # Simulate data
-np.random.seed(42)
-N = 100  # Number of time steps
+np.random.seed(43)
+N = len(obs_true)  # Number of time steps
 T = 1    # Number of competitors (if multiple, modify the model accordingly)
 true_latent_state = np.cumsum(np.random.normal(0, 1, N))  # True latent states (random walk)
-obs_sigma = 0.5  # Observation noise
-trans_sigma = 1.0  # Transition noise
-y = true_latent_state + np.random.normal(0, obs_sigma, N)  # Observations
+obs_sigma = float(avg_std) ** 2  # Observation noise
+trans_sigma = 0.01 ** 2  # Transition noise
+y = obs_true.flatten()  # Observations
 
 # Prepare data for Stan
 stan_data = {

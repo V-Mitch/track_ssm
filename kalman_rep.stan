@@ -16,16 +16,20 @@ parameters {
   vector[N] latent_state;   // Latent states (fitness levels across time)
   real mu_0;                // Initial state mean
   real<lower=0> sigma_0;    // Initial state standard deviation
+  real<lower=0> s_mu;                // state average
+  real<lower=0> s_cov;               // state covariance
 }
 
 // Model block: define the state-space model and likelihood.
 model {
   // Initial state prior
   latent_state[1] ~ normal(mu_0, sigma_0);
+  s_mu ~ normal(0, 1);  // Prior on state mean shift
+  s_cov ~ normal(1, 0.5);  // Prior on state covariance
   
   // State transition model (Gaussian random walk)
   for (t in 2:N) {
-    latent_state[t] ~ normal(latent_state[t-1], trans_sigma);
+    latent_state[t] ~ normal(latent_state[t-1] + s_mu , s_cov);
   }
 
   // Observation model
