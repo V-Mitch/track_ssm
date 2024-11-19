@@ -14,6 +14,12 @@ from build_ssm import *
 from putils import *
 from add_wind_mark import *
 
+# from cmdstanpy import install_cmdstan
+# install_cmdstan(overwrite=True)
+
+from cmdstanpy import CmdStanModel
+
+
 df_raw = pd.read_csv('men 100m from_2020-01-01 to_2024-09-30.csv')
 
 def convert_dates(date):
@@ -85,7 +91,7 @@ L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_m
 #   forward_filter_lgssm(model_lgssm, params, x)
 
 L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-  forward_filter_lgssm_mv( params, x)
+  forward_filter_lgssm_mv( x, params)
 
 # Call the plot function
 plot_single_kalman_s(sequences=None, ax=ax, obs_true=obs_true,
@@ -136,4 +142,54 @@ for i, competitor in enumerate(personal_df_list):
 plt.tight_layout()
 plt.savefig('competitor_kalman_plots_2.png')  # Save the combined plot
 plt.show()
+
+
+
+
+# Simulate data
+np.random.seed(42)
+N = 100  # Number of time steps
+T = 1    # Number of competitors (if multiple, modify the model accordingly)
+true_latent_state = np.cumsum(np.random.normal(0, 1, N))  # True latent states (random walk)
+obs_sigma = 0.5  # Observation noise
+trans_sigma = 1.0  # Transition noise
+y = true_latent_state + np.random.normal(0, obs_sigma, N)  # Observations
+
+# Prepare data for Stan
+stan_data = {
+    "N": N,                      # Number of time steps
+    "T": T,                      # Number of competitors
+    "y": y.tolist(),             # Observations
+    "obs_sigma": obs_sigma,      # Observation noise
+    "trans_sigma": trans_sigma,  # Transition noise
+}
+
+stan_model_file = "kalman_rep.stan"
+model = CmdStanModel(stan_file=stan_model_file)
+
+# Fit the model
+fit = model.sample(data=stan_data, chains=4, iter_sampling=1000, iter_warmup=500)
+print(fit.summary())
+
+# Extract latent states
+latent_state_samples = fit.stan_variable("latent_state")
+
+# Calculate posterior mean and credible intervals
+posterior_mean = np.mean(latent_state_samples, axis=0)
+lower_credible = np.percentile(latent_state_samples, 2.5, axis=0)
+upper_credible = np.percentile(latent_state_samples, 97.5, axis=0)
+
+# Plot the results
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+plt.plot(y, label="Observed Data", color="black")
+plt.plot(posterior_mean, label="Posterior Mean of Latent State", color="blue")
+plt.fill_between(range(N), lower_credible, upper_credible, color="blue", alpha=0.2, label="95% Credible Interval")
+plt.legend()
+plt.xlabel("Time")
+plt.ylabel("Value")
+plt.title("Latent State Estimation with Bayesian MCMC")
+plt.show()
+
 
