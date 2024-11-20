@@ -63,11 +63,11 @@ params = {
     'obs_coeff': 1.00,
     's_mu': -float(improvement_avg),
     # 's_mu': 0.00,
-    's_cov': 0.01 ** 2,
+    's_cov': 0.125997,
     'init_s_mu': float(mean_std),
-    'init_s_cov': 0.05 ** 2,
+    'init_s_cov': 0.05,
     'obs_mu': 0.00,
-    'obs_cov': float(avg_std) ** 2
+    'obs_cov': float(avg_std) 
 }
 
   
@@ -128,11 +128,8 @@ for i, competitor in enumerate(personal_df_list):
     print(f"{competitor}: {x.shape}")
     opt_params = optimize_transmission_noise(x = x, params = params, ssm = forward_filter_lgssm_mv)
     
-    # opt_params = optimize_transmission_noise(params = params,
-    # build_function = forward_filter_lgssm_mv,
-    # x = x)
-    
-    L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = model.forward_filter(x, final_step_only=False)
+    L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+    forward_filter_lgssm_mv( x, opt_params)
     
     ax_row = ax[i, :]
 
@@ -146,14 +143,14 @@ plt.show()
 
 
 
-# Simulate data
+# Initialize data
 np.random.seed(43)
 N = len(obs_true)  # Number of time steps
 T = 1    # Number of competitors (if multiple, modify the model accordingly)
-true_latent_state = np.cumsum(np.random.normal(0, 1, N))  # True latent states (random walk)
-obs_sigma = float(avg_std) ** 2  # Observation noise
-trans_sigma = 0.01 ** 2  # Transition noise
+obs_sigma = float(avg_std) # Observation noise
 y = obs_true.flatten()  # Observations
+mu_0 = float(mean_std)
+sigma_0 = 0.05
 
 # Prepare data for Stan
 stan_data = {
@@ -161,35 +158,66 @@ stan_data = {
     "T": T,                      # Number of competitors
     "y": y.tolist(),             # Observations
     "obs_sigma": obs_sigma,      # Observation noise
-    "trans_sigma": trans_sigma,  # Transition noise
+    "mu_0": mu_0,   # initial time point
+    "sigma_0": sigma_0,  # std of start point
 }
 
 stan_model_file = "kalman_rep.stan"
 model = CmdStanModel(stan_file=stan_model_file)
 
 # Fit the model
-fit = model.sample(data=stan_data, chains=4, iter_sampling=1000, iter_warmup=500)
+fit = model.sample(data=stan_data, chains=4, iter_sampling=1500, iter_warmup=500)
 print(fit.summary())
 
 # Extract latent states
 latent_state_samples = fit.stan_variable("latent_state")
 
 # Calculate posterior mean and credible intervals
-posterior_mean = np.mean(latent_state_samples, axis=0)
-lower_credible = np.percentile(latent_state_samples, 2.5, axis=0)
-upper_credible = np.percentile(latent_state_samples, 97.5, axis=0)
+s_mu_samples = fit.stan_variable("s_mu")
+filtered_s_mu = np.mean(latent_state_samples, axis=0)
+s_cov = np.mean(fit.stan_variable("s_cov"))
+one_step_ahead_samples = latent_state_samples[:, :-1] + s_mu
+# obs_prediction = np.mean(one_step_ahead_samples, axis=0)
+num_samples, N = latent_state_samples.shape
+t1_samples = np.random.normal(mu_0 + s_mu_samples, sigma_0, size=num_samples)
+lagged_samples = latent_state_samples[:, :-1] 
+one_step_ahead_samples = lagged_samples + s_mu_samples[:, None] 
+all_one_step_ahead_samples = np.hstack([t1_samples[:, None], one_step_ahead_samples]) 
+# Step 2: Compute posterior mean and credible intervals
+posterior_mean = np.mean(all_one_step_ahead_samples, axis=0)  # Shape: [N]
+lower_credible = np.percentile(all_one_step_ahead_samples, 2.5, axis=0)  # Shape: [N]
+upper_credible = np.percentile(all_one_step_ahead_samples, 97.5, axis=0)  # Shape: [N]
+
+filtered_covs = np.var(one_step_ahead_samples, axis=0)
+
+# Create a figure with side-by-side plots
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns
+
+# Call your plotting function with the processed data
+plot_single_stan_outcome(
+    sequences=None,
+    ax=ax,
+    lower_credible = lower_credible, 
+    upper_credible = upper_credible,
+    obs_true=y,  # Observed data (replace with actual observed data array)
+    filtered_means=filtered_s_mu,
+    observation_means=posterior_mean,
+)
+
+plt.tight_layout()
+plt.show()
 
 # Plot the results
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.figure(figsize=(10, 6))
-plt.plot(y, label="Observed Data", color="black")
-plt.plot(posterior_mean, label="Posterior Mean of Latent State", color="blue")
-plt.fill_between(range(N), lower_credible, upper_credible, color="blue", alpha=0.2, label="95% Credible Interval")
-plt.legend()
-plt.xlabel("Time")
-plt.ylabel("Value")
-plt.title("Latent State Estimation with Bayesian MCMC")
-plt.show()
+# plt.figure(figsize=(10, 6))
+# plt.plot(y, label="Observed Data", color="black")
+# plt.plot(posterior_mean, label="Posterior Mean of Latent State", color="blue")
+# plt.fill_between(range(N), lower_credible, upper_credible, color="blue", alpha=0.2, label="95% Credible Interval")
+# plt.legend()
+# plt.xlabel("Time")
+# plt.ylabel("Value")
+# plt.title("Latent State Estimation with Bayesian MCMC")
+# plt.show()
 
 

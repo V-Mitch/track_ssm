@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import tensorflow as tf
 
 def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, observation_covs, 
                       params, competitor, n_steps):
@@ -78,6 +79,8 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     
 def plot_tfp_kalman_s2(ax_row, obs_true, obs_alter, filtered_means, observation_means, observation_covs, 
                       params, competitor, n_steps):
+    filtered_means = tf.squeeze(filtered_means, axis = -1)
+    observation_means = tf.squeeze(observation_means, axis = -1)
     s_mu = round(params.get('s_mu'), 4)
     s_cov = round(params.get('s_cov'), 4)
     
@@ -162,8 +165,8 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     observation_covs = np.asarray(observation_covs).reshape(-1)  # This will turn (25, 1, 1) into (25,)
 
     # Calculate prediction intervals
-    lower_bound = obs_predictions - 1.96 * np.sqrt(observation_covs)  # 95% prediction interval lower bound
-    upper_bound = obs_predictions + 1.96 * np.sqrt(observation_covs)  # 95% prediction interval upper bound
+    lower_bound = obs_predictions - 1.96 * observation_covs  # 95% prediction interval lower bound
+    upper_bound = obs_predictions + 1.96 * observation_covs  # 95% prediction interval upper bound
 
     # Calculate Mean Squared Error (MSE)
     mse = np.mean(np.square(obs_true - obs_predictions))
@@ -176,6 +179,46 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
 
     # Plot the predicted observations
     ax[1].plot(x_axis, obs_predictions, label='obs_kf_pred', linestyle='--', color='#33FF57')
+    ax[1].plot(x_axis, obs_true, label='obs_true', color='blue')  # Plot true observations for comparison
+
+    # Shade the prediction intervals
+    ax[1].fill_between(x_axis, lower_bound, upper_bound, color='lightgreen', alpha=0.5, label='Prediction Interval')
+
+    # Create a legend entry for the MSE (as a patch)
+    mse_patch = mpatches.Patch(color='none', label=f'MSE: {mse:.4f}')
+
+    # Add MSE to the legend along with existing plot items
+    ax[1].legend(handles=[*ax[1].get_legend_handles_labels()[0], mse_patch], loc='best')
+
+    ax[1].set_title('Predicted Observations vs True Observations')
+    
+    
+def plot_single_stan_outcome(sequences, ax, obs_true, filtered_means, lower_credible, upper_credible, 
+    observation_means):
+    
+    # Ensure all inputs are numpy arrays and flattened
+    obs_predictions = np.asarray(observation_means).flatten()
+    obs_true = np.asarray(obs_true).flatten()
+    filtered_means = np.asarray(filtered_means).flatten()
+    
+    # Flattening observation_covs to be 1D
+    # observation_covs = np.asarray(observation_covs).reshape(-1)  # This will turn (25, 1, 1) into (25,)
+
+    # Calculate prediction intervals
+    lower_bound = lower_credible  # 95% prediction interval lower bound
+    upper_bound = upper_credible  # 95% prediction interval upper bound
+
+    # Calculate Mean Squared Error (MSE)
+    mse = np.mean(np.square(obs_true - obs_predictions))
+
+    # Plot the filtered state estimates
+    x_axis = np.arange(len(filtered_means))
+    ax[0].plot(x_axis, filtered_means, label='s_mcmc_estimate', color='orange')
+    ax[0].legend(loc='best')
+    ax[0].set_title('Filtered State Estimates')
+
+    # Plot the predicted observations
+    ax[1].plot(x_axis, obs_predictions, label='obs_mcmc_pred', linestyle='--', color='#33FF57')
     ax[1].plot(x_axis, obs_true, label='obs_true', color='blue')  # Plot true observations for comparison
 
     # Shade the prediction intervals

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from build_ssm import *
 
 def optimize_transmission_noise(params: dict, x: tf.Tensor, ssm: callable,
-initial_lr = 0.02, num_epochs = 80, decay_factor = 0.1, decay_epoch = 50):
+initial_lr = 0.02, num_epochs = 160, decay_factor = 0.1, decay_epoch = 50):
 
   # Initial parameters dictionary
   initial_params = params
@@ -19,7 +19,7 @@ initial_lr = 0.02, num_epochs = 80, decay_factor = 0.1, decay_epoch = 50):
   s_mu = tf.Variable(initial_params['s_mu'], dtype=tf.float32)
   s_cov = tf.Variable(initial_params['s_cov'], dtype=tf.float32)
   
-  optimizer = tf.optimizers.Adam(learning_rate=0.05)
+  optimizer = tf.optimizers.Adam(learning_rate=0.03)
   
   # Optimization loop
   for epoch in range(num_epochs):

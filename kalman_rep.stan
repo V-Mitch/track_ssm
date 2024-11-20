@@ -8,24 +8,22 @@ data {
   int<lower=1> T;           // Number of competitors
   vector[N] y;              // Observations (e.g., race times)
   real<lower=0> obs_sigma;  // Observation noise standard deviation
-  real<lower=0> trans_sigma; // Transition noise standard deviation
+  real<lower=0> mu_0;        // Initial time prior
+  real<lower=0> sigma_0;     // std of start time prior
 }
 
 // Parameters block: define latent states and model parameters.
 parameters {
-  vector[N] latent_state;   // Latent states (fitness levels across time)
-  real mu_0;                // Initial state mean
-  real<lower=0> sigma_0;    // Initial state standard deviation
-  real<lower=0> s_mu;                // state average
-  real<lower=0> s_cov;               // state covariance
+  vector[N] latent_state;                      // Latent states (fitness levels across time)
+  real<lower=-1, upper=1> s_mu;                // state drift
+  real<lower=0> s_cov;                         // state covariance
 }
 
 // Model block: define the state-space model and likelihood.
 model {
-  // Initial state prior
+  
+  // Initial state priors
   latent_state[1] ~ normal(mu_0, sigma_0);
-  s_mu ~ normal(0, 1);  // Prior on state mean shift
-  s_cov ~ normal(1, 0.5);  // Prior on state covariance
   
   // State transition model (Gaussian random walk)
   for (t in 2:N) {
