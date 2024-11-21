@@ -58,9 +58,10 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     x_values_next = np.array([len(filtered_means), len(filtered_means) + 1])  # Shape (2,)
     y_lower_values = np.array([lower_bound_next, lower_bound_next]).flatten()  # Shape (2,)
     y_upper_values = np.array([upper_bound_next, upper_bound_next]).flatten()  # Shape (2,)
-    predicted_display_mean = np.array([predicted_next_mean, predicted_next_mean])
-    predicted_next_mean_display = round(float(predicted_display_mean[0,0]),4)
-
+    
+    predicted_display_mean = np.array([predicted_next_mean, predicted_next_mean]).squeeze()
+    predicted_next_mean_display = round(float(predicted_display_mean[0]),4)
+    
     # Extend the prediction interval for the next observation
     ax_row[1].fill_between(x_values_next, 
                             y_lower_values, 
@@ -163,7 +164,7 @@ def plot_single_kalman_s(sequences, ax, obs_true, filtered_means, filtered_covs,
     
     # Flattening observation_covs to be 1D
     observation_covs = np.asarray(observation_covs).reshape(-1)  # This will turn (25, 1, 1) into (25,)
-
+  
     # Calculate prediction intervals
     lower_bound = obs_predictions - 1.96 * observation_covs  # 95% prediction interval lower bound
     upper_bound = obs_predictions + 1.96 * observation_covs  # 95% prediction interval upper bound
