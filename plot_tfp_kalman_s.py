@@ -50,7 +50,7 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     predicted_next_mean = last_filtered_mean * params.get('obs_coeff', 1) + params.get('obs_mu', 0)
 
     # Calculate the standard deviation for prediction interval
-    predicted_next_std = np.sqrt(last_filtered_cov * params.get('obs_coeff', 1)**2)
+    predicted_next_std = (last_filtered_cov * params.get('obs_coeff', 1)**2)
 
     # Calculate prediction interval bounds for the next observation
     lower_bound_next = (predicted_next_mean - 1.96 * predicted_next_std).flatten()
