@@ -18,7 +18,7 @@ I use several resources for running the project denoted in [the references secti
 
 # Depiction of State-Space Model
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/depiction_1.png)
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/start_100m.jpg)
 
 $s_t$ is the hidden state(s) that be interpreted as the fitness level of the sprinter $y_t$ is the observation we have: the 100m time of the sprinter $t$ is the race number $t$ at which the competitor competed
 
@@ -123,7 +123,7 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 | BEDNAREK | 9.88  | 9.91    | 9.94    | 9.95    |
 | SEVILLE  | 9.91  | 9.82    | 9.83    | 9.92    |
 
-![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/assets/blob/master/finish_100m.jpg)
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/finish_100m.jpgg)
 
 # References {#references}
 
