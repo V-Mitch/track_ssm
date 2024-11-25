@@ -59,73 +59,6 @@ def df_by_athlete(data):
   
 personal_df_list = df_by_athlete(df_spec)
 
-obs_true = np.array(personal_df_list['Letsile TEBOGO']['Mark_wm'])[:, np.newaxis]
-
-# Initialize data
-np.random.seed(43)
-N = len(obs_true)  # Number of time steps
-T = 1    # Number of competitors (if multiple, modify the model accordingly)
-obs_sigma = float(avg_std) # Observation noise
-y = obs_true.flatten()  # Observations
-mu_0 = float(mean_std)
-sigma_0 = 0.05
-
-# Prepare data for Stan
-stan_data = {
-    "N": N,                      # Number of time steps
-    "T": T,                      # Number of competitors
-    "y": y.tolist(),             # Observations
-    "obs_sigma": obs_sigma,      # Observation noise
-    "mu_0": mu_0,   # initial time point
-    "sigma_0": sigma_0,  # std of start point
-}
-
-stan_model_file = "kalman_rep.stan"
-model = CmdStanModel(stan_file=stan_model_file)
-
-# Fit the model
-fit = model.sample(data=stan_data, chains=4, iter_sampling=1500, iter_warmup=500)
-print(fit.summary())
-
-# Extract latent states
-latent_state_samples = fit.stan_variable("latent_state")
-
-# Calculate posterior mean and credible intervals
-s_mu_samples = fit.stan_variable("s_mu")
-filtered_s_mu = np.mean(latent_state_samples, axis=0)
-s_cov = np.mean(fit.stan_variable("s_cov"))
-one_step_ahead_samples = latent_state_samples[:, :-1] + s_mu
-# obs_prediction = np.mean(one_step_ahead_samples, axis=0)
-num_samples, N = latent_state_samples.shape
-t1_samples = np.random.normal(mu_0 + s_mu_samples, sigma_0, size=num_samples)
-lagged_samples = latent_state_samples[:, :-1] 
-one_step_ahead_samples = lagged_samples + s_mu_samples[:, None] 
-all_one_step_ahead_samples = np.hstack([t1_samples[:, None], one_step_ahead_samples]) 
-# Step 2: Compute posterior mean and credible intervals
-posterior_mean = np.mean(all_one_step_ahead_samples, axis=0)  # Shape: [N]
-lower_credible = np.percentile(all_one_step_ahead_samples, 2.5, axis=0)  # Shape: [N]
-upper_credible = np.percentile(all_one_step_ahead_samples, 97.5, axis=0)  # Shape: [N]
-
-filtered_covs = np.var(one_step_ahead_samples, axis=0)
-
-# Create a figure with side-by-side plots
-fig, ax = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns
-
-# Call your plotting function with the processed data
-plot_single_stan_outcome(
-    sequences=None,
-    ax=ax,
-    lower_credible = lower_credible, 
-    upper_credible = upper_credible,
-    obs_true=y,  # Observed data (replace with actual observed data array)
-    filtered_means=filtered_s_mu,
-    observation_means=posterior_mean,
-)
-
-plt.tight_layout()
-plt.show()
-
-
 
 # Create a figure with a 2x8 grid of subplots
 fig, ax = plt.subplots(num_rows, num_cols, figsize=(8, 16), dpi=300)  # 2 columns, 8 rows
@@ -136,20 +69,21 @@ for i, competitor in enumerate(personal_df_list):
     obs_true = np.array(personal_df_list[competitor]['Mark_wm'])[:, np.newaxis]
     obs_alter = np.array(personal_df_list[competitor]['Mark'])[:, np.newaxis]
     
-    # Initialize data
+    # Initialize data defaults
     np.random.seed(43)
     N = len(obs_true)  # Number of time steps
     T = 1    # Number of competitors (if multiple, modify the model accordingly)
     obs_sigma = float(avg_std) # Observation noise
     y = obs_true.flatten()  # Observations
+    y_alt = obs_alter.flatten()
     mu_0 = float(mean_std)
     sigma_0 = 0.05
     
     # Prepare data for Stan
-      stan_data = {
+    stan_data = {
           "N": N,                      # Number of time steps
           "T": T,                      # Number of competitors
-          "y": y.tolist(),             # Observations
+          "y": y.tolist(),               # Observations
           "obs_sigma": obs_sigma,      # Observation noise
           "mu_0": mu_0,   # initial time point
           "sigma_0": sigma_0,  # std of start point
@@ -166,7 +100,8 @@ for i, competitor in enumerate(personal_df_list):
     s_mu_samples = fit.stan_variable("s_mu")
     filtered_s_mu = np.mean(latent_state_samples, axis=0)
     s_cov = np.mean(fit.stan_variable("s_cov"))
-    one_step_ahead_samples = latent_state_samples[:, :-1] + s_mu
+    one_step_ahead_samples = latent_state_samples[:, :-1] + np.mean(s_mu_samples)
+    next_race_sample = latent_state_samples[:, -1] + np.mean(s_mu_samples)
     # obs_prediction = np.mean(one_step_ahead_samples, axis=0)
     num_samples, N = latent_state_samples.shape
     t1_samples = np.random.normal(mu_0 + s_mu_samples, sigma_0, size=num_samples)
@@ -178,31 +113,40 @@ for i, competitor in enumerate(personal_df_list):
     lower_credible = np.percentile(all_one_step_ahead_samples, 2.5, axis=0)  # Shape: [N]
     upper_credible = np.percentile(all_one_step_ahead_samples, 97.5, axis=0)  # Shape: [N]
     filtered_covs = np.var(one_step_ahead_samples, axis=0)
+    lower_bound_next = np.percentile(next_race_sample, 2.5, axis=0)
+    upper_bound_next =  np.percentile(next_race_sample, 97.5, axis=0)
+    predicted_next = np.mean(next_race_sample, axis=0)
     
-    # Make a tensorflow dataset
-    X_train = tf.data.Dataset.from_tensors(obs_true)
-    x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
-    print(f"{competitor}: {x.shape}")
-    opt_params = optimize_transmission_noise(x = x, params = params, ssm = forward_filter_lgssm_mv)
-    
-    L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
-    forward_filter_lgssm_mv( x, opt_params)
+    # # Make a tensorflow dataset
+    # X_train = tf.data.Dataset.from_tensors(obs_true)
+    # x = next(iter(X_train.batch(batch_size=100).map(lambda x: tf.cast(x, dtype=tf.float32))))[0]
+    # print(f"{competitor}: {x.shape}")
+    # opt_params = optimize_transmission_noise(x = x, params = params, ssm = forward_filter_lgssm_mv)
+    # 
+    # L, filtered_means, filtered_covs, predicted_means, predicted_covs, observation_means, observation_covs = \
+    # forward_filter_lgssm_mv( x, opt_params)
     
     ax_row = ax[i, :]
 
     # Call the plotting function with the processed data
-    plot_single_stan_outcome(
+    plot_multi_stan_outcome(
         sequences=None,
-        ax=ax,
+        ax=ax_row,
+        competitor=competitor,
         lower_credible = lower_credible, 
         upper_credible = upper_credible,
+        lower_credible_next = lower_bound_next,
+        upper_credible_next = upper_bound_next,
+        predicted_next = predicted_next, 
         obs_true=y,  # Observed data (replace with actual observed data array)
+        obs_alter=y_alt,
         filtered_means=filtered_s_mu,
         observation_means=posterior_mean,
+        fitted_mcmc = fit
     )
 
 plt.tight_layout()
-plt.savefig('competitor_kalman_plots_2.png')  # Save the combined plot
+plt.savefig('competitor_kalman_plots_3.png')  # Save the combined plot
 plt.show()
 
 

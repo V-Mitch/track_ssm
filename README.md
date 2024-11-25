@@ -12,7 +12,7 @@ Apply and understand the State-Space model approach with Bayesian Filtering. The
 
 I use several resources for running the project denoted in [the references section](#References)
 
-![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/start_100m.jpg)
+![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/assets/blob/master/start_100m.jpg)
 
 (Photo: Fabrizio Bensch/Reuters)
 
@@ -52,13 +52,13 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 ## Results of Model 1
 
-| Name                           | State Variable |     |              Name              | Observation Variable |
+| Name | State Variable |   | Name | Observation Variable |
 |---------------|:-------------:|:-------------:|:-------------:|:-------------:|
-| ${\color{orange}{fit\ level}}$ |     $s_t$      |     | ${\color{blue}{Race\ Result}}$ |        $y_t$         |
-| fit_prog_avg                   |   $\mu_{w}$    |     |            obs_pred            | $p(y_t \| s_{t-1})$  |
-| fit_var                        |  $\sigma_{w}$  |     |      Next Race Prediction      | $p(y_T \| s_{T-1})$  |
+| ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{blue}{Race\ Result}}$ | $y_t$ |
+| fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
+| fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_1.png)
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_1.png)
 
 ## Commentary of Model 1 and Discussion
 
@@ -78,39 +78,52 @@ In order of importance the following most important points are not yet accounted
 
 ## Assumptions of Model 2
 
--   I stick to the same assumptions as model 1 but I change the $y_t$ variable from being the race result to a race result "modified for wind". Essentially, I decided to borrow the results of the *Moinat* paper that determines that the *change* in a  100m time due to wind can be determined by the following equation:
+-   I stick to the same assumptions as model 1 but I change the $y_t$ variable from being the race result to a race result "modified for wind". Essentially, I decided to borrow the results of the *Moinat* paper that determines that the *change* in a 100m time due to wind can be determined by the following equation:
 
 $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 
 ## Results of Model 2
 
-| Name                           | State Variable |     |                  Name                   | Observation Variable |
+| Name | State Variable |   | Name | Observation Variable |
 |---------------|:-------------:|:-------------:|:-------------:|:-------------:|
-| ${\color{orange}{fit\ level}}$ |     $s_t$      |     |      ${\color{red}{Race\ Result}}$      |       not used       |
-| fit_prog_avg                   |   $\mu_{w}$    |     |                obs_pred                 | $p(y_t \| s_{t-1})$  |
-| fit_var                        |  $\sigma_{w}$  |     |          Next Race Prediction           | $p(y_T \| s_{T-1})$  |
-|                                |                |     | ${\color{blue}{Wind-Corrected Result}}$ |        $y_t$         |
+| ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{red}{Race\ Result}}$ | not used |
+| fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
+| fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
+|  |  |  | ${\color{blue}{Wind-Corrected Result}}$ | $y_t$ |
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_2.png)
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_2.png)
 
 ## Commentary of Model 2 and Discussion
-  
 
+# Model 3:
+
+## Assumptions of Model 3
+
+## Results of Model 3
+
+| Name | State Variable |   | Name | Observation Variable |
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
+| ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{red}{Race\ Result}}$ | not used |
+| fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
+| fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
+|  |  |  | ${\color{blue}{Wind-Corrected Result}}$ | $y_t$ |
+
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_3.png)
 
 # Race Result and the predicted times of each version
 
-| Runner   | Time  | Model 1 | Model 2 |
-|----------|-------|---------|---------|
-| LYLES    | 9.784 | 9.79    | 9.81    |
-| THOMPSON | 9.789 | 9.83    | 9.84    |
-| KERLEY   | 9.81  | 9.90    | 9.91    |
-| SIMBINE  | 9.82  | 9.90    | 9.89    |
-| JACOBS   | 9.85  | 9.92    | 9.95    |
-| TEBOGO   | 9.86  | 9.94    | 9.95    |
-| BEDNAREK | 9.88  | 9.91    | 9.94    |
-| SEVILLE  | 9.91  | 9.82    | 9.83    |
+| Runner   | Time  | Model 1 | Model 2 | Model 3 |
+|----------|-------|---------|---------|---------|
+| LYLES    | 9.784 | 9.79    | 9.81    | 9.90    |
+| THOMPSON | 9.789 | 9.83    | 9.84    | 9.98    |
+| KERLEY   | 9.81  | 9.90    | 9.91    | 9.97    |
+| SIMBINE  | 9.82  | 9.90    | 9.89    | 9.94    |
+| JACOBS   | 9.85  | 9.92    | 9.95    | 10.02   |
+| TEBOGO   | 9.86  | 9.94    | 9.95    | 9.99    |
+| BEDNAREK | 9.88  | 9.91    | 9.94    | 9.95    |
+| SEVILLE  | 9.91  | 9.82    | 9.83    | 9.92    |
 
-![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/finish_100m.jpg)
+![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/assets/blob/master/finish_100m.jpg)
 
 # References {#references}
 

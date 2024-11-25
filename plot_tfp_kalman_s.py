@@ -212,7 +212,7 @@ def plot_single_stan_outcome(sequences, ax, obs_true, filtered_means, lower_cred
 
     # Calculate Mean Squared Error (MSE)
     mse = np.mean(np.square(obs_true - obs_predictions))
-
+    # breakpoint()
     # Plot the filtered state estimates
     x_axis = np.arange(len(filtered_means))
     ax[0].plot(x_axis, filtered_means, label='s_mcmc_estimate', color='orange')
@@ -233,3 +233,70 @@ def plot_single_stan_outcome(sequences, ax, obs_true, filtered_means, lower_cred
     ax[1].legend(handles=[*ax[1].get_legend_handles_labels()[0], mse_patch], loc='best')
 
     ax[1].set_title('Predicted Observations vs True Observations')
+    
+def plot_multi_stan_outcome(sequences, ax, competitor, obs_true, obs_alter, filtered_means, lower_credible, upper_credible, 
+    lower_credible_next, upper_credible_next, predicted_next,
+    observation_means, fitted_mcmc):
+    
+    # Ensure all inputs are numpy arrays and flattened
+    obs_predictions = np.asarray(observation_means).flatten()
+    obs_true = np.asarray(obs_true).flatten()
+    filtered_means = np.asarray(filtered_means).flatten()
+    s_mu = fitted_mcmc.stan_variable("s_mu").mean()
+    s_cov = fitted_mcmc.stan_variable("s_cov").mean()
+    n_steps = fitted_mcmc.stan_variable("latent_state").shape[1]
+    
+    # Flattening observation_covs to be 1D
+    # observation_covs = np.asarray(observation_covs).reshape(-1)  # This will turn (25, 1, 1) into (25,)
+
+    # Calculate prediction intervals
+    lower_bound = lower_credible  # 95% prediction interval lower bound
+    upper_bound = upper_credible  # 95% prediction interval upper bound
+
+    # Calculate Mean Squared Error (MSE)
+    mse = np.mean(np.square(obs_true - obs_predictions))
+    # breakpoint()
+    # Plot the filtered state estimates
+    x_axis = np.arange(len(filtered_means))
+    ax[0].plot(x_axis, filtered_means, label='fit_level', color='orange')
+    ax[0].legend(loc='lower left', ncol=1)
+    ax[0].set_title(f'{competitor} - Filtered State Estimates')
+    ax[0].set_ylim(bottom=9.2)
+    
+    textstr = (f'fit_prog_avg: {s_mu:.4f}\n'
+               f'fit_var: {s_cov:.4f}\n'
+               f'n_races: {n_steps}')
+               
+    ax[0].text(0.95, 0.05, textstr, transform=ax[0].transAxes, fontsize=10,
+                   verticalalignment='bottom', horizontalalignment='right',
+                   bbox=dict(facecolor='white', edgecolor = 'lightgray', alpha=0.5))
+
+    # Plot the predicted observations
+    ax[1].plot(x_axis, obs_predictions, label='obs_mcmc_pred', linestyle='--', color='#33FF57')
+    ax[1].plot(x_axis, obs_true, label='Wind-Corrected Result', color='blue')  # Plot true observations for comparison
+    ax[1].plot(x_axis, obs_alter.flatten(), label='Race Result', marker='+', linestyle='', color='red') 
+
+    # Shade the prediction intervals
+    ax[1].fill_between(x_axis, lower_bound, upper_bound, color='lightgreen', alpha=0.5, label='Credible Interval')
+
+    x_values_next = np.array([n_steps, n_steps + 1])  # Shape (2,)
+    y_lower_values = np.array([lower_credible_next, lower_credible_next]).flatten()  # Shape (2,)
+    y_upper_values = np.array([upper_credible_next, upper_credible_next]).flatten()  # Shape (2,)
+    predicted_display_mean = np.array([predicted_next, predicted_next])
+    predicted_next_mean_display = round(float(predicted_display_mean[0]), 4)
+    
+    # Extend the prediction interval for the next observation
+    ax[1].fill_between(x_values_next,
+                            y_lower_values,
+                            y_upper_values,
+                            color='lightcoral', alpha=0.5, label='Next Obs Prediction Interval')
+    ax[1].plot(x_values_next, predicted_display_mean, label=f'Next Race Prediction: {predicted_next_mean_display}', linestyle='--', color='coral')
+
+    # Create a legend entry for the MSE (as a patch)
+    mse_patch = mpatches.Patch(color='none', label=f'MSE: {mse:.4f}')
+
+    # Add MSE to the legend along with existing plot items
+    ax[1].legend(handles=[*ax[1].get_legend_handles_labels()[0], mse_patch], loc='best', ncol = 2, fontsize = 6)
+
+    ax[1].set_title('Predicted Observations vs True Observations')
+    ax[1].set_ylim(bottom=9.2) 
