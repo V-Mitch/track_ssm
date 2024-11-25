@@ -58,7 +58,7 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 | fit_prog_avg                   |   $\mu_{w}$    |     |            obs_pred            | $p(y_t \| s_{t-1})$  |
 | fit_var                        |  $\sigma_{w}$  |     |      Next Race Prediction      | $p(y_T \| s_{T-1})$  |
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots.png)
+![](https://github.com/V-Mitch/track_ssm/blob/master/competitor_kalman_plots_1.png)
 
 ## Commentary of Model 1 and Discussion
 
