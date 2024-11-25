@@ -12,13 +12,11 @@ Apply and understand the State-Space model approach with Bayesian Filtering. The
 
 I use several resources for running the project denoted in [the references section](#References)
 
-![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/assets/blob/master/start_100m.jpg)
+![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/assets/start_100m.jpg)
 
 (Photo: Fabrizio Bensch/Reuters)
 
 # Depiction of State-Space Model
-
-![](https://github.com/V-Mitch/track_ssm/blob/master/assets/start_100m.jpg)
 
 $s_t$ is the hidden state(s) that be interpreted as the fitness level of the sprinter $y_t$ is the observation we have: the 100m time of the sprinter $t$ is the race number $t$ at which the competitor competed
 
