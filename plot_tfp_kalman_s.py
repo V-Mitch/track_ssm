@@ -13,8 +13,8 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     x_axis = np.arange(len(filtered_means))
 
     # Calculate prediction intervals for existing observations
-    lower_bound = observation_means.numpy().flatten() - 1.96 * np.sqrt(observation_covs.numpy().flatten())
-    upper_bound = observation_means.numpy().flatten() + 1.96 * np.sqrt(observation_covs.numpy().flatten())
+    lower_bound = observation_means.numpy().flatten() - 1.96 * (observation_covs.numpy().flatten())
+    upper_bound = observation_means.numpy().flatten() + 1.96 * (observation_covs.numpy().flatten())
 
     # Calculate MSE
     mse = np.mean(np.square(obs_true.flatten() - observation_means.numpy().flatten()))
@@ -78,6 +78,7 @@ def plot_tfp_kalman_s(ax_row, obs_true, filtered_means, observation_means, obser
     ax_row[1].set_title(f'{competitor} - Predicted vs True Observations')
     ax_row[1].set_ylim(bottom=9.2)  # Ensure y-axis is the same for comparison
     
+    
 def plot_tfp_kalman_s2(ax_row, obs_true, obs_alter, filtered_means, observation_means, observation_covs, 
                       params, competitor, n_steps):
     filtered_means = tf.squeeze(filtered_means, axis = -1)
@@ -88,8 +89,8 @@ def plot_tfp_kalman_s2(ax_row, obs_true, obs_alter, filtered_means, observation_
     x_axis = np.arange(len(filtered_means))
 
     # Calculate prediction intervals for existing observations
-    lower_bound = observation_means.numpy().flatten() - 1.96 * np.sqrt(observation_covs.numpy().flatten())
-    upper_bound = observation_means.numpy().flatten() + 1.96 * np.sqrt(observation_covs.numpy().flatten())
+    lower_bound = observation_means.numpy().flatten() - 1.96 * (observation_covs.numpy().flatten())
+    upper_bound = observation_means.numpy().flatten() + 1.96 * (observation_covs.numpy().flatten())
 
     # Calculate MSE
     mse = np.mean(np.square(obs_true.flatten() - observation_means.numpy().flatten()))
@@ -126,7 +127,7 @@ def plot_tfp_kalman_s2(ax_row, obs_true, obs_alter, filtered_means, observation_
     predicted_next_mean = last_filtered_mean * params.get('obs_coeff', 1) + params.get('obs_mu', 0)
 
     # Calculate the standard deviation for prediction interval
-    predicted_next_std = np.sqrt(last_filtered_cov * params.get('obs_coeff', 1)**2)
+    predicted_next_std = (last_filtered_cov * params.get('obs_coeff', 1)**2)
 
     # Calculate prediction interval bounds for the next observation
     lower_bound_next = (predicted_next_mean - 1.96 * predicted_next_std).flatten()
