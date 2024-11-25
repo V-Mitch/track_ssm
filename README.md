@@ -121,7 +121,7 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 | BEDNAREK | 9.88  | 9.91    | 9.94    | 9.95    |
 | SEVILLE  | 9.91  | 9.82    | 9.83    | 9.92    |
 
-![](https://github.com/V-Mitch/track_ssm/blob/master/assets/finish_100m.jpgg)
+![](https://github.com/V-Mitch/track_ssm/blob/master/assets/finish_100m.jpg)
 
 # References {#references}
 
