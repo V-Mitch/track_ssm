@@ -37,11 +37,7 @@ initial_lr = 0.02, num_epochs = 160, decay_factor = 0.1, decay_epoch = 50):
               'init_s_cov': initial_params['init_s_cov'],
               'obs_cov': initial_params['obs_cov']  
           }
-          # model = build_function(num_timesteps=x.shape[0], params=params)
-          # L, _, _, _, _, _, _ = model.forward_filter(x, final_step_only=True)
-          # loss = -L
-          
-          # model = build_function(num_timesteps=x.shape[0], params=params)
+
           L, _, _, _, _, _, _ = forward_filter_lgssm_mv(x, params = params)
           loss = -L
           

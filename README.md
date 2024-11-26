@@ -19,17 +19,19 @@ I use several resources for running the project denoted in [the references secti
 ### Table of Contents
 
 0.  [Depiction of the State-Space Model](#Depiction-of-State-Space-Model)
-1.  [Model 1: Kalman Filter with Tensorflow](#Model-1)
+1.  [Model 1: Kalman Filter & Tensorflow](#Model-1)
 2.  [Model 2: Wind Adjustment](#Model-2)
-3.  [Model 3: Move to MCMC with Stan](#Model-3)
+3.  [Model 3: Changing the State Optimizer to MCMC with Stan](#Model-3)
 
-# Depiction of State-Space Model
+# Depiction of State-Space Model {#depiction-of-state-space-model}
 
 $s_t$ is the hidden state(s) that be interpreted as the fitness level of the sprinter $y_t$ is the observation we have: the 100m time of the sprinter $t$ is the race number $t$ at which the competitor competed
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/assets/depiction_1.png)
 
-# Model 1:
+# Model 1: {#model-1}
+
+*Kalman Filter & Tensorflow*
 
 ## Assumptions of Model 1
 
@@ -67,21 +69,20 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_1.png)
 
-## Commentary of Model 1 and Discussion
+## Commentary of Model 1
 
 Many of the assumptions do not reflect realism in this first iteration of the state-space model. Hopefully, it provides a good starting point for improvement.
 
 In order of importance the following most important points are not yet accounted for correctly. These initial observations are from general knowledge of the sport:
 
 -   The runners do not exert full effort in races for qualifications or where the stakes are lower to avoid injury and preserve strength for later races or stages.
-
 -   Earlier in a season, runners are slower than later in a season even if their general progression is on an uptrend. - As the fitness level improves, it becomes increasingly difficult to make incremental improvements. Thus, the transmission function of the fitness level state is not linear and does not have normally distributed "noise".
-
 -   From my observation and experience it seems as though the distribution of performances is likely negatively skewed and not normally distributed. It is more likely for a blunder to happen every so often whereas a "perfect" race is only marginally better than the average performance.
-
 -   Wind is not accounted for. At each race, it is known that a wind blowing against a runner will slow them down whereas a wind blowing behind them will speed them up.
 
-# Model 2:
+# Model 2: {#model-2}
+
+*Wind Adjustment*
 
 ## Assumptions of Model 2
 
@@ -100,11 +101,26 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_2.png)
 
-## Commentary of Model 2 and Discussion
+## Commentary of Model 2
 
-# Model 3:
+Changing the observations to wind-adjusted performances has generally lead to (a worsening) increase in the loss function across the athletes. Nonetheless, I will keep it as is for now since it enables me to compare the times of different athletes without worrying about a wind advantage that may have been more favorable for some. The difference appears negligible qualitatively.
+
+# Model 3: {#model-3}
+
+*Changing the State Optimizer and framework to MCMC with Stan*
 
 ## Assumptions of Model 3
+
+When working on the first 2 projects, I first used the [LinearGaussianStateSpaceModel](https://www.tensorflow.org/probability/api_docs/python/tfp/distributions/LinearGaussianStateSpaceModel) tensorflow function that was pre-built and easier to deploy. 
+In order to: 1.) Ensure that the behavior of the function was correct and 2.) Future adaptations to tackle the challenge of relaxing assumptions and providing a more realistic model, 3.) Improve my understanding of the State-Space model, I built a re-engineered function "[forward_filter_lgssm_mv](https://github.com/V-Mitch/track_ssm/blob/master/build_ssm.py)". 
+Despite successfully re-creating the Tensorflow function and exposing the specific closed-form formulas of the Kalman Filter, I realized I needed more flexibility. 
+I figured that switching to an MCMC framework (that also alows for optimization of $\mu_w$ and $\sigma_w$) would mainly help with the following:  
+
+- Experimenting seamlessly with different non-gaussian distributions for emission and transition functions.
+- No need to explicitly discover the closed-form solutions like in the Kalman Filter.
+- The State transition could be non-linear.
+- Uncertainty quantification in the Bayesian sense (interpretation of credible intervals).
+
 
 ## Results of Model 3
 
@@ -118,6 +134,21 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 ![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_3.png)
 
 # Race Result and the predicted times of each version
+
+## Overall Path Error
+
+| Runner   | MSE*100   | Model 1 | Model 2 | Model 3 |
+|----------|-------|---------|---------|---------|
+| LYLES    |   | 0.95    | 0.88    | 0.50    |
+| THOMPSON |   | 1.28    | 1.18    | 0.93    |
+| KERLEY   |   | 1.01    | 0.88    | 0.53    |
+| SIMBINE  |   | 2.58    | 1.49    | 1.00    |
+| JACOBS   |   | 0.92   | 0.74    | 0.44   |
+| TEBOGO   |   | 3.73    | 1.82    | 1.46    |
+| BEDNAREK |   | 0.95    | 1.10    | 0.75    |
+| SEVILLE  |   | 1.76    | 0.69    | 0.39    |
+
+## Race day Prediction
 
 | Runner   | Time  | Model 1 | Model 2 | Model 3 |
 |----------|-------|---------|---------|---------|
