@@ -10,6 +10,8 @@ Apply and understand the State-Space model approach with Bayesian Filtering. The
 
 -   Make a prediction for the 100m final that took place at the Paris Olympics 2024 on August 4th using only data from before that day.
 
+Models 1 to 3 are focused on understanding and implementation. From Model 4 onward, more emphasis will be placed on assumptions and exploratory data analysis.
+
 I use several resources for running the project denoted in [the references section](#References)
 
 ![Fabrizio Bensch/Reuters](https://github.com/V-Mitch/track_ssm/blob/master/assets/start_100m.jpg)
@@ -22,6 +24,8 @@ I use several resources for running the project denoted in [the references secti
 1.  [Model 1: Kalman Filter & Tensorflow](#Model-1)
 2.  [Model 2: Wind Adjustment](#Model-2)
 3.  [Model 3: Changing the State Optimizer to MCMC with Stan](#Model-3)
+4.  *Work In Progress*
+5.  [Comparing Results](#Comparing-Results)
 
 # Depiction of State-Space Model {#depiction-of-state-space-model}
 
@@ -129,7 +133,7 @@ When working on the first 2 projects, I first used the [LinearGaussianStateSpace
 
 ![](https://github.com/V-Mitch/track_ssm/blob/master/assets/competitor_kalman_plots_3.png)
 
-# Race Result and the predicted times of each version
+# Comparing Results
 
 ## Overall Path Error
 
