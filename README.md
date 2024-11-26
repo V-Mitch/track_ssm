@@ -18,10 +18,10 @@ I use several resources for running the project denoted in [the references secti
 
 ### Table of Contents
 
-0.  [Depiction of the State-Space Model](#Depiction%20of%20State-Space%20Model)
-1.  [Model 1: Kalman Filter with Tensorflow](#Model%201)
-2.  [Model 2: Wind Adjustment](#Model%202)
-3.  [Model 3: Move to MCMC with Stan](#Model%203)
+0.  [Depiction of the State-Space Model](#Depiction-of-State-Space-Model)
+1.  [Model 1: Kalman Filter with Tensorflow](#Model-1)
+2.  [Model 2: Wind Adjustment](#Model-2)
+3.  [Model 3: Move to MCMC with Stan](#Model-3)
 
 # Depiction of State-Space Model
 
@@ -60,7 +60,7 @@ $\sigma_v = \hat{\sigma}_{clockings}$
 ## Results of Model 1
 
 | Name | State Variable |   | Name | Observation Variable |
-|----|:--:|:--:|:--:|:--:|
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
 | ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{blue}{Race\ Result}}$ | $y_t$ |
 | fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
 | fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
@@ -92,7 +92,7 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 ## Results of Model 2
 
 | Name | State Variable |   | Name | Observation Variable |
-|----|:--:|:--:|:--:|:--:|
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
 | ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{red}{Race\ Result}}$ | not used |
 | fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
 | fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
@@ -109,7 +109,7 @@ $$ \Delta P = P - 0.0049 w + 0.009459 P w - 0.0042w^2 $$
 ## Results of Model 3
 
 | Name | State Variable |   | Name | Observation Variable |
-|----|:--:|:--:|:--:|:--:|
+|---------------|:-------------:|:-------------:|:-------------:|:-------------:|
 | ${\color{orange}{fit\ level}}$ | $s_t$ |  | ${\color{red}{Race\ Result}}$ | not used |
 | fit_prog_avg | $\mu_{w}$ |  | obs_pred | $p(y_t \| s_{t-1})$ |
 | fit_var | $\sigma_{w}$ |  | Next Race Prediction | $p(y_T \| s_{T-1})$ |
